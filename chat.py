@@ -4,7 +4,7 @@ import openai
 from time import time, sleep
 from uuid import uuid4
 import json
-
+import argparse
 
 #
 #   Helper Functions
@@ -27,7 +27,7 @@ def open_json(filepath):
 # GPT handler
 #
 gpt_scripts_directory = 'gpt_scripts'
-gpt_persona_directory = 'gpt_personalities'
+gpt_persona_directory = 'gpt_personas'
 gpt_actions_directory = 'gpt_actions'
 def chatbot(messages, model="gpt-4", temperature=0):
     max_retry = 7
@@ -208,28 +208,31 @@ if __name__ == '__main__':
     # instantiate chatbot
     openai.api_key = open_file('key_openai.txt')
 
-    # @TODO allow the passing of these arguments into the script
-    #   --user = Username of the person who is making the inquiry
-    #   --save-chat = Names of chat logs
-    #   --save-kb = KBs that this conversation should be saved too
-    #   --known-users = Profiles the AI can access
-    #   --known-kb = KBs the AI can search
-    #   --action = Load from gpt_actions directory
-    #   --lang = language to use
-    #   --persona = personality of the chatbot
-    #   --topic = topic of conversation
-    #
-    current_user = "Rolyataylor2"
-    save_chat = "AI_Rolyataylor2_Private"
-    save_kb = "Rolyataylor2_Private"
-    save_profile = "Rolyataylor2_Private"
-    known_profiles = "Taylor_Private,Taylor_Public".split(',')
-    known_kb = "AI_Taylor_Private,AI_Taylor_Public".split(',')
-    ai_personality = "ReflectiveJournalingBot"
-    conversation_topic = 'ethics'
-    conversation_language = "english"
-    chatbot_action = 'general_chat'
-    text = '\n\nHello my name is ' + current_user
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-user", "--user", help="The name of the user chatting with the bot. String 'Taylor'.")
+    parser.add_argument("-savechat", "--savechat", help="Name of the chatlog to save and continue from. String 'Taylor-AI-Conversation'.")
+    parser.add_argument("-savekb", "--savekb", help="KBs to update with new text. String 'Taylor-private'.")
+    parser.add_argument("-saveuser", "--saveuser", help="Userprofile to save too. String 'Taylor-private'.")
+    parser.add_argument("-knownusers", "--knownusers", help="Profiles that the AI knows about. Comma-seprated string 'Taylor-private,Taylor-public'.")
+    parser.add_argument("-knownkbs", "--knownkbs", help="Knowledge bases to pull information from. Comma-seprated string 'kbone,kbtwo,kbthree'.")
+    parser.add_argument("-action", "--action", help="Action to use be taken from gpt_actions directory. Default 'General_Chat'.")
+    parser.add_argument("-lang", "--lang", help="Language that the bot should use. Default 'English'.")
+    parser.add_argument("-persona", "--persona", help="How the bot should behave based on script in gpt_personas. Default 'ReflectiveJournalingBot'.")
+    parser.add_argument("-topic", "--topic", help="Set a topic to talk about. Default ''.")
+    parser.add_argument("-say", "--say", help="What to say to the bot.. Hello bot! Nice to see you!")
+    args = parser.parse_args()
+
+    current_user = args.user
+    save_chat = args.savechat
+    save_kb = args.savekb
+    save_profile = args.saveuser
+    known_profiles = args.knownusers.split(',')
+    known_kb = args.knownkbs.split(',')
+    ai_personality = args.persona
+    conversation_topic = args.topic
+    conversation_language = args.lang
+    chatbot_action = args.action
+    text = args.say
 
     # 
     #   Save Chat Logs
