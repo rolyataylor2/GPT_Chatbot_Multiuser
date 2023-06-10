@@ -15,7 +15,6 @@ To utilize the script, follow the steps below:
 2. Set up the necessary configuration files, including:
 
    - `key_openai.txt`: Provide your OpenAI API key in this file.
-   - `gpt_scripts`: Create a directory named `gpt_scripts` and place the GPT scripts (in .txt format) inside it.
 
 3. Configure the script by providing the required command-line arguments:
 
@@ -41,7 +40,7 @@ To utilize the script, follow the steps below:
       --AI-Personality=southernbell 
       --lang=english 
       --topic=economic_concerns 
-      --action=survey_bot
+      --action=general_chat
       "Hello my name is Taylor"
    ```
 

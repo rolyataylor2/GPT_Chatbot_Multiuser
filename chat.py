@@ -1,7 +1,6 @@
 import chromadb
 from chromadb.config import Settings
 import openai
-import yaml
 from time import time, sleep
 from uuid import uuid4
 
@@ -181,7 +180,7 @@ if __name__ == '__main__':
     # instantiate chatbot
     openai.api_key = open_file('key_openai.txt')
 
-    # Arguments
+    # @TODO allow the passing of these arguments into the script
     #   --user = Username of the person who is making the inquiry
     #   --save-chat = Names of chat logs
     #   --save-kb = KBs that this conversation should be saved too
@@ -192,25 +191,26 @@ if __name__ == '__main__':
     #   --persona = personality of the chatbot
     #   --topic = topic of conversation
     #   
-    #   This_Script.py
-    #   --user=Taylor 
-    #   --save-chat=AI_Taylor_Private 
-    #   --save-kb=AI_Taylor_Private
-    #   --save-profile=Taylor_Private
-    #   --known-profiles=Taylor_Private,Taylor_Public,Jack_Public,Thomas_Public,Tiki_Public
-    #   --known-kb=AI_Taylor_Private,AI_Taylor_Public,AI_Jack_Public,AI_Thomas_public,AI_Tiki_Public
-    #   --lang=english
-    #   --AI-Personality=92834283
-    #   "What is jack's favorite food?"
+    #   Example usage:
+    #   chat.py
+    #       --user=Taylor 
+    #       --save-chat=AI_Taylor_Private 
+    #       --save-kb=AI_Taylor_Private
+    #       --save-profile=Taylor_Private
+    #       --known-profiles=Taylor_Private,Taylor_Public
+    #       --known-kb=AI_Taylor_Private,AI_Taylor_Public << Anything works, It should be like Person1_Person2_Privacy or something
+    #       --lang=english
+    #       --AI-Personality="ReflectiveJournalingBot"
+    #       "What is jack's favorite food?"
     #
     current_user = "Rolyataylor2"
     save_chat = "AI_Rolyataylor2_Private"
     save_kb = "Rolyataylor2_Private"
     save_profile = "Rolyataylor2_Private"
-    known_profiles = "Taylor_Private,Taylor_Public,Jack_Public,Thomas_Public,Tiki_Public".split(',')
-    known_kb = "AI_Taylor_Private,AI_Taylor_Public,AI_Jack_Public,AI_Thomas_public,AI_Tiki_Public".split(',')
+    known_profiles = "Taylor_Private,Taylor_Public".split(',')
+    known_kb = "AI_Taylor_Private,AI_Taylor_Public".split(',')
     language = "english"
-    ai_personality = "southern-bell"
+    ai_personality = "ReflectiveJournalingBot"
     conversation_topic = 'ethics'
     chatbot_action = 'general_chat'
     text = '\n\nHello my name is ' + current_user
