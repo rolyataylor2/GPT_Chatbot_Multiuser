@@ -5,6 +5,15 @@ import yaml
 from time import time, sleep
 from uuid import uuid4
 
+def save_file(filepath, content):
+    with open(filepath, 'w', encoding='utf-8') as outfile:
+        outfile.write(content)
+
+
+def open_file(filepath):
+    with open(filepath, 'r', encoding='utf-8', errors='ignore') as infile:
+        return infile.read()
+    
 # GPT handler
 gpt_scripts_directory = 'gpt_scripts'
 def chatbot(messages, model="gpt-4", temperature=0):
@@ -18,7 +27,6 @@ def chatbot(messages, model="gpt-4", temperature=0):
             ###    trim message object
             debug_object = [i['content'] for i in messages]
             debug_object.append(text)
-            save_yaml('api_logs/convo_%s.yaml' % time(), debug_object)
             if response['usage']['total_tokens'] >= 7000:
                 a = messages.pop(1)
             
