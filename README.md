@@ -15,7 +15,6 @@ To use the script, follow the steps below:
 2. Set up the necessary configuration files, including:
 
    - `key_openai.txt`: Provide your OpenAI API key in this file.
-   - `gpt_scripts`: Create a directory named `gpt_scripts` and place the GPT scripts (in .txt format) inside it.
 
 3. Configure the script by providing the required command-line arguments:
 
@@ -31,14 +30,15 @@ To use the script, follow the steps below:
    - `-topic`: Set a topic to talk about (default: empty).
    - `-say`: Specify what to say to the bot.
 
-   Example usage:
+4. Run the script by executing the following command:
+
    ```
    python chat.py -user Taylor 
       -savechat Taylor-AI-Conversation 
       -savekb Taylor-private 
       -saveuser Taylor-private 
       -knownusers Taylor-private,Taylor-public 
-      -knownkbs kbone,kbtwo,kbthree 
+      -knownkbs Taylor-private,Taylor-public 
       -action General_Chat 
       -lang English 
       -persona ReflectiveJournalingBot 
@@ -46,45 +46,55 @@ To use the script, follow the steps below:
       -say "Hello bot! Nice to see you!"
    ```
 
-4. Run the script by executing the following command:
-
-   ```
-   python This_Script.py
-   ```
-
    The script will initiate the conversation with the chatbot based on the provided arguments and display the chatbot's responses in the terminal.
 
-5. Save the relevant details of the conversation:
+## Save the relevant details of the conversation:
+
+   The bot will do the following on each run:
 
    - Chat logs will be saved with the specified name in the savechat parameter.
    - User profiles will be updated with the latest information.
    - Knowledge bases (KBs) will be updated with the new conversation text.
 
-6. Features
+## Features
 
-   What can you do with it?
+   This bot contains the ability to form and recall "Memories" from conversations while also forming "Relationships" with user profiles. Fine control of the bots "Memories", "Relationships" and "Knowledge" can be fine-tuned to the context. The power and flexability comes to light when you customize the bot via command line arguments to adapt to conversations and people.
    
    - Create an infinite number of conversations with the bot
    - Seperate out "Memories" the bot has about the conversations
    - Allow the bot to have "Relationships" with other users and share those "Memories" with the current user
    - Allow the user to "Know" a user via the known-profiles argument
 
-7. Use Case Scenerios
-
-   - Create a bot that can interject in conversations about past conversations
-   - The bot can talk about things that you are interested in with friends
+## Use Case Scenerios
+   
+   Fine-tuning the bots "Memories", "Relationships" and "Knowledge" can allow for many different use-case scenerios. This is intended to be the back end for a front-end.
+   
+   Front-end ideas could be:
+   
+   - Assisted Group Conversations
+      - Create a bot that can interject in conversations with relavant information
+   - Elaborate on personal interests or self improvement
+      - The bot can talk about pretty much anything based on the persona that is loaded
+   - Securly share context with friends by creating "Public" KBs
       - Say you are talking with the bot about your birthday coming up, the bot can mention that to your friends in casual conversation
       - You are going to a concert soon, the bot could talk with your friends about it
       - Something has happened to you and you want everyone to know but dont want to message them
-      - The bot could include your public KB's and make new friends for you
-   - The GUI should handle permissions between databases, Maybe allow the user to share certain databases with others
-      - You could have a work database that is shared with coworkers
-      - You could have a AI ethics database you share with AI ethics boards
-      - You can have a relationship database that you share with your significant others
-      - You can have a general likes and dislikes database you share with everyone
-   - Have a bot make decisions on your behalf
-      - Creating custom GPT_personalities would allow for the bot to use your KB and profile to chat on your behalf
-   - Custom GPT_Personalities for controlling devices
-      - Create a persona that can issue commands, This persona knows you through your KB and profile to allow it to customize those commands
+   - Make new friends using the KBs to see if your compatible
+      - Load up a couple people's profiles and KBs and have the bot say whether the people are compatible???
+   
+   The GUI should handle permissions between databases, be careful not to share personal KBs with the wrong people
 
+   - You could have a work database that is shared with coworkers
+   - You could have a AI ethics database you share with AI ethics boards
+   - You can have a relationship database that you share with your significant others
+   - You can have a general likes and dislikes database you share with everyone
+
+   Using persona scripts you may be able to have the bot answer questions using your KB and your Profile which may allow for the bot to answer questions on your behalf
+   - Maybe a friend can ask the YOU BOT what your favorite food is. The YOU BOT could answer this.
+
+## Future Features
+
+   -Allow for a -noaction flag to allow the KB and personaly profiles to be updated without the bot being a part of the conversation
+
+## Conclusion
 By using this script and configuring the appropriate user profiles and knowledge bases, you can customize the chatbot's level of knowledge about past conversations and the individuals it interacts with.
