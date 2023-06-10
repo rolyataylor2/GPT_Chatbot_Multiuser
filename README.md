@@ -34,10 +34,10 @@ To utilize the script, follow the steps below:
       --save-chat=AI_Taylor_Private 
       --save-kb=AI_Taylor_Private 
       --save-profile=Taylor_Private 
-      --known-profiles=Taylor_Private,Taylor_Public,Jack_Public,Thomas_Public,Tiki_Public 
-      --known-kb=AI_Taylor_Private,AI_Taylor_Public,AI_Jack_Public,AI_Thomas_public,AI_Tiki_Public 
+      --known-profiles=Taylor_Private,Taylor_Public
+      --known-kb=AI_Taylor_Private,AI_Taylor_Public
       --lang=english 
-      --AI-Personality=southernbell 
+      --AI-Personality=ReflectiveJournalingBot 
       --lang=english 
       --topic=economic_concerns 
       --action=general_chat
@@ -60,4 +60,14 @@ To utilize the script, follow the steps below:
 
    Additionally, the Chroma Database will be persisted to save all the conversation details.
 
+6. Use case scenerios
+
+   This script is intended to be used to provide the backend for a GUI frontend. Some features you can implement with this is:
+   
+   - Create an infinite number of conversations with the bot
+   - Seperate out "Memories" the bot has about the conversations
+   - Allow the bot to have "Relationships" with other users and share those "Memories" with the current user
+   - Allow the user to "Know" a user via the <known-profiles> argument
+
+   
 By using this script and configuring the appropriate user profiles and knowledge bases, you can customize the chatbot's level of knowledge about past conversations and the individuals it interacts with.

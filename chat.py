@@ -198,7 +198,7 @@ if __name__ == '__main__':
     #       --save-kb=AI_Taylor_Private
     #       --save-profile=Taylor_Private
     #       --known-profiles=Taylor_Private,Taylor_Public
-    #       --known-kb=AI_Taylor_Private,AI_Taylor_Public << Anything works, It should be like Person1_Person2_Privacy or something
+    #       --known-kb=AI_Taylor_Private,AI_Taylor_Public << Anything works, It should be like Person1_Person2_Privacy or something similar to saved-chat
     #       --lang=english
     #       --AI-Personality="ReflectiveJournalingBot"
     #       "What is jack's favorite food?"
