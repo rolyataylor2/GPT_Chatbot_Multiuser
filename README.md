@@ -1,12 +1,10 @@
 # Chatbot Interaction Script
 
-This script enables a specific user to interact with a chatbot that leverages the memories stored in known knowledge bases (KBs). The chatbot can access and retrieve information from the KBs specified in the known-kb parameter. Additionally, the chatbot is designed to be aware of user profiles defined in the known-users parameter. These profiles determine the level of knowledge the chatbot possesses about past conversations and the individuals it has interacted with.
-
-## This does not work yet
+This script allows a particular user to interact with a chatbot that utilizes the memories stored in known knowledge bases (KBs). The chatbot can access and update the KBs specified in the savekb parameter. Additionally, the script enables the chatbot to be aware of user profiles defined in the knownusers parameter. These profiles determine the level of knowledge the chatbot possesses about past conversations and the individuals it has interacted with.
 
 ## Usage
 
-To utilize the script, follow the steps below:
+To use the script, follow the steps below:
 
 1. Ensure that the required dependencies are installed by running the following command:
 
@@ -17,33 +15,35 @@ To utilize the script, follow the steps below:
 2. Set up the necessary configuration files, including:
 
    - `key_openai.txt`: Provide your OpenAI API key in this file.
+   - `gpt_scripts`: Create a directory named `gpt_scripts` and place the GPT scripts (in .txt format) inside it.
 
 3. Configure the script by providing the required command-line arguments:
 
-   - `--user`: Specify the username of the person making the inquiry.
-   - `--save-chat`: Specify the name of the chat log to be saved.
-   - `--save-kb`: Specify the KBs to which this conversation should be saved.
-   - `--known-users`: Define the profiles the chatbot can access.
-   - `--known-kb`: Specify the KBs the chatbot can search.
-   - `--action`: Specify the type of action dialog for the bot to be loaded from
-   - `--lang`: Specify the language to use.
-   - `--persona`: Specify the personality of the chatbot.
-   - `--topic`: Specify the topic of conversation.
+   - `-user`: Specify the username of the person interacting with the chatbot.
+   - `-savechat`: Specify the name of the chat log to be saved and continued from.
+   - `-savekb`: Specify the KBs to be updated with new text.
+   - `-saveuser`: Specify the user profile to save to.
+   - `-knownusers`: Define the profiles that the chatbot is aware of (comma-separated).
+   - `-knownkbs`: Specify the KBs the chatbot can access (comma-separated).
+   - `-action`: Specify the type of action to be taken from the gpt_actions directory (default: General_Chat).
+   - `-lang`: Specify the language the bot should use (default: English).
+   - `-persona`: Specify how the bot should behave based on the script in the gpt_personas directory (default: ReflectiveJournalingBot).
+   - `-topic`: Set a topic to talk about (default: empty).
+   - `-say`: Specify what to say to the bot.
 
    Example usage:
    ```
-   python This_Script.py --user=Taylor 
-      --save-chat=AI_Taylor_Private 
-      --save-kb=AI_Taylor_Private 
-      --save-profile=Taylor_Private 
-      --known-profiles=Taylor_Private,Taylor_Public
-      --known-kb=AI_Taylor_Private,AI_Taylor_Public
-      --lang=english 
-      --AI-Personality=ReflectiveJournalingBot 
-      --lang=english 
-      --topic=economic_concerns 
-      --action=general_chat
-      "Hello my name is Taylor"
+   python chat.py -user Taylor 
+      -savechat Taylor-AI-Conversation 
+      -savekb Taylor-private 
+      -saveuser Taylor-private 
+      -knownusers Taylor-private,Taylor-public 
+      -knownkbs kbone,kbtwo,kbthree 
+      -action General_Chat 
+      -lang English 
+      -persona ReflectiveJournalingBot 
+      -topic '' 
+      -say "Hello bot! Nice to see you!"
    ```
 
 4. Run the script by executing the following command:
@@ -52,15 +52,13 @@ To utilize the script, follow the steps below:
    python This_Script.py
    ```
 
-   The script will execute the conversation with the chatbot based on the provided arguments and display the chatbot's responses in the terminal.
+   The script will initiate the conversation with the chatbot based on the provided arguments and display the chatbot's responses in the terminal.
 
 5. Save the relevant details of the conversation:
 
-   - Chat logs will be saved based on the provided `--save-chat` argument.
-   - User profiles will be updated with the latest notes.
-   - Long-term memory (KBs) will be updated with the latest conversation.
-
-   Additionally, the Chroma Database will be persisted to save all the conversation details.
+   - Chat logs will be saved with the specified name in the savechat parameter.
+   - User profiles will be updated with the latest information.
+   - Knowledge bases (KBs) will be updated with the new conversation text.
 
 6. Features
 
