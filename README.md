@@ -2,6 +2,8 @@
 
 This script enables a specific user to interact with a chatbot that leverages the memories stored in known knowledge bases (KBs). The chatbot can access and retrieve information from the KBs specified in the known-kb parameter. Additionally, the chatbot is designed to be aware of user profiles defined in the known-users parameter. These profiles determine the level of knowledge the chatbot possesses about past conversations and the individuals it has interacted with.
 
+## This does not work yet
+
 ## Usage
 
 To utilize the script, follow the steps below:
@@ -67,7 +69,7 @@ To utilize the script, follow the steps below:
    - Create an infinite number of conversations with the bot
    - Seperate out "Memories" the bot has about the conversations
    - Allow the bot to have "Relationships" with other users and share those "Memories" with the current user
-   - Allow the user to "Know" a user via the <known-profiles> argument
+   - Allow the user to "Know" a user via the known-profiles argument
 
-   
+
 By using this script and configuring the appropriate user profiles and knowledge bases, you can customize the chatbot's level of knowledge about past conversations and the individuals it interacts with.
