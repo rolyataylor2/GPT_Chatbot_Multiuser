@@ -187,7 +187,7 @@ if __name__ == '__main__':
     #   --save-kb = KBs that this conversation should be saved too
     #   --known-users = Profiles the AI can access
     #   --known-kb = KBs the AI can search
-    #   --action = chat, event, code, something
+    #   --action = Load from gpt_actions directory
     #   --lang = language to use
     #   --persona = personality of the chatbot
     #   --topic = topic of conversation
@@ -212,6 +212,7 @@ if __name__ == '__main__':
     language = "english"
     ai_personality = "southern-bell"
     conversation_topic = 'ethics'
+    chatbot_action = 'general_chat'
     text = '\n\nHello my name is ' + current_user
 
     # 
@@ -238,7 +239,7 @@ if __name__ == '__main__':
     #   Load the script for GPT, Insert the arguments needed
     #
     user_profile = userInit(save_profile)
-    chatbot_process_script = chatbotFetchScript('chatbot_process')
+    chatbot_process_script = chatbotFetchScript(chatbot_action)
     chatbot_process_script = chatbot_process_script.replace('<<PROFILE>>', user_profile) # Add user profile into instructions
     chatbot_process_script = chatbot_process_script.replace('<<KB>>', ''.join(kb)) # Add long-term memory into instructions
 

@@ -24,7 +24,7 @@ To utilize the script, follow the steps below:
    - `--save-kb`: Specify the KBs to which this conversation should be saved.
    - `--known-users`: Define the profiles the chatbot can access.
    - `--known-kb`: Specify the KBs the chatbot can search.
-   - `--action`: Specify the type of action, such as chat, event, code, or something else.
+   - `--action`: Specify the type of action dialog for the bot to be loaded from
    - `--lang`: Specify the language to use.
    - `--persona`: Specify the personality of the chatbot.
    - `--topic`: Specify the topic of conversation.
