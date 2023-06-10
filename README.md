@@ -1,36 +1,53 @@
-# ChromaDB Chatbot
+# Chatbot Interaction Script
 
-Public version of my ChromaDB chatbot that keeps track of user profile and historical topics. Should be mostly ready to go right out of the box. 
-
-## Setup
-
-1. Install chromadb and openai (in `requirements.txt` file)
-2. Update `user_profile.txt` file with your initial information
-3. Update `key_openai.txt` with your OpenAI API key
+This script enables a specific user to interact with a chatbot that leverages the memories stored in known knowledge bases (KBs). The chatbot can access and retrieve information from the KBs specified in the known-kb parameter. Additionally, the chatbot is designed to be aware of user profiles defined in the known-users parameter. These profiles determine the level of knowledge the chatbot possesses about past conversations and the individuals it has interacted with.
 
 ## Usage
 
-- Main chat client: `python chat.py`
-- Take a look in your KB: `python chromadb_peek.py`
+To utilize the script, follow the steps below:
 
-## Code Explanation
+1. Ensure that the required dependencies are installed by running the following command:
 
-This Python script serves as the implementation of a chatbot that leverages the OpenAI's GPT-4 model. It additionally integrates the chatbot with a persistent knowledge base using the ChromaDB library. Here's an overview of how the different parts of the script function:
+   ```
+   pip install -r requirements.txt
+   ```
 
-1. **Utility Functions**: The script starts with several utility functions to handle file operations and to interact with OpenAI's API. These include functions for saving and opening files, and a function to run the chatbot, managing retries in case of exceptions.
-2. **Main Application**: The script's main operation is contained within a continuous loop (`while True:`), enabling continuous interaction with the user. This loop does the following:
-   - **Instantiates the ChromaDB client** for persistent storage and knowledge base management.
-   - **Initiates the chatbot** by loading OpenAI's API key and preparing a conversation list.
-   - **Captures user input** and adds it to the conversation list. The input is also logged in a separate file for record-keeping.
-   - **Searches the knowledge base** for relevant content based on the current conversation and updates the chatbot's default system message accordingly.
-   - **Generates a response** from the chatbot based on the conversation so far, which includes the updated default system message and the user's input.
-   - **Updates the user profile** based on the user's recent messages, using the chatbot's response as the updated profile.
-   - **Updates the knowledge base** with the most recent conversation, either adding a new entry or updating an existing entry. If an existing entry becomes too long, it's split into two separate entries.
+2. Set up the necessary configuration files, including:
 
-The script logs all interactions with the OpenAI API and updates to the knowledge base, providing a record of the chatbot's operations and aiding in debugging and optimization efforts. The use of the ChromaDB library allows for scalable storage and retrieval of the chatbot's knowledge base, accommodating a growing number of conversations and data points.
+   - `key_openai.txt`: Provide your OpenAI API key in this file.
+   - `gpt_scripts`: Create a directory named `gpt_scripts` and place the GPT scripts (in .txt format) inside it.
 
-But seriously just look at the code, it's pretty straight forward. 
+3. Configure the script by providing the required command-line arguments:
 
-## Contributing
+   - `--user`: Specify the username of the person making the inquiry.
+   - `--save-chat`: Specify the name of the chat log to be saved.
+   - `--save-kb`: Specify the KBs to which this conversation should be saved.
+   - `--known-users`: Define the profiles the chatbot can access.
+   - `--known-kb`: Specify the KBs the chatbot can search.
+   - `--action`: Specify the type of action, such as chat, event, code, or something else.
+   - `--lang`: Specify the language to use.
+   - `--persona`: Specify the personality of the chatbot.
+   - `--topic`: Specify the topic of conversation.
 
-You're welcome to submit a pull request to make mild changes or fix bugs. Any substantial refactors will be rejected. If you want to take this work and modify it, please just work on your own fork. This repo will eventually be made a public readonly archive. 
+   Example usage:
+   ```
+   python This_Script.py --user=Taylor --save-chat=AI_Taylor_Private --save-kb=AI_Taylor_Private --save-profile=Taylor_Private --known-profiles=Taylor_Private,Taylor_Public,Jack_Public,Thomas_Public,Tiki_Public --known-kb=AI_Taylor_Private,AI_Taylor_Public,AI_Jack_Public,AI_Thomas_public,AI_Tiki_Public --lang=english --AI-Personality=92834283 "What is Jack's favorite food?"
+   ```
+
+4. Run the script by executing the following command:
+
+   ```
+   python This_Script.py
+   ```
+
+   The script will execute the conversation with the chatbot based on the provided arguments and display the chatbot's responses in the terminal.
+
+5. Save the relevant details of the conversation:
+
+   - Chat logs will be saved based on the provided `--save-chat` argument.
+   - User profiles will be updated with the latest notes.
+   - Long-term memory (KBs) will be updated with the latest conversation.
+
+   Additionally, the Chroma Database will be persisted to save all the conversation details.
+
+By using this script and configuring the appropriate user profiles and knowledge bases, you can customize the chatbot's level of knowledge about past conversations and the individuals it interacts with.
