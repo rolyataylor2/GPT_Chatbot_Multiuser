@@ -31,7 +31,17 @@ To utilize the script, follow the steps below:
 
    Example usage:
    ```
-   python This_Script.py --user=Taylor --save-chat=AI_Taylor_Private --save-kb=AI_Taylor_Private --save-profile=Taylor_Private --known-profiles=Taylor_Private,Taylor_Public,Jack_Public,Thomas_Public,Tiki_Public --known-kb=AI_Taylor_Private,AI_Taylor_Public,AI_Jack_Public,AI_Thomas_public,AI_Tiki_Public --lang=english --AI-Personality=92834283 "What is Jack's favorite food?"
+   python This_Script.py --user=Taylor 
+      --save-chat=AI_Taylor_Private 
+      --save-kb=AI_Taylor_Private 
+      --save-profile=Taylor_Private 
+      --known-profiles=Taylor_Private,Taylor_Public,Jack_Public,Thomas_Public,Tiki_Public 
+      --known-kb=AI_Taylor_Private,AI_Taylor_Public,AI_Jack_Public,AI_Thomas_public,AI_Tiki_Public 
+      --lang=english 
+      --AI-Personality=southernbell 
+      -lang=english 
+      -topic=economic_concerns 
+      "What is Jack's favorite food?"
    ```
 
 4. Run the script by executing the following command:
