@@ -5,10 +5,13 @@ from time import time, sleep
 from uuid import uuid4
 import json
 
+
+#
+#   Helper Functions
+#
 def save_file(filepath, content):
     with open(filepath, 'w', encoding='utf-8') as outfile:
         outfile.write(content)
-
 
 def open_file(filepath):
     with open(filepath, 'r', encoding='utf-8', errors='ignore') as infile:
@@ -17,12 +20,15 @@ def open_file(filepath):
 def save_json(filepath, content):
     save_file(filepath, json.dumps(content))
 
-
 def open_json(filepath):
     return json.loads(open_file(filepath))
   
+#
 # GPT handler
+#
 gpt_scripts_directory = 'gpt_scripts'
+gpt_persona_directory = 'gpt_personalities'
+gpt_actions_directory = 'gpt_actions'
 def chatbot(messages, model="gpt-4", temperature=0):
     max_retry = 7
     retry = 0
@@ -53,8 +59,18 @@ def chatbot(messages, model="gpt-4", temperature=0):
 def chatbotFetchScript(name):
     content = open_file(gpt_scripts_directory + '/' + name + '.txt')
     return content;
+def chatbotFetchAction(name):
+    content = open_file(gpt_actions_directory + '/' + name + '.txt')
+    return content;
+def chatbotFetchPersona(name):
+    content = open_file(gpt_persona_directory + '/' + name + '.txt')
+    return content;
 
-# KB management - Profile === database with which to work with
+
+#
+# KB management
+#   filename - What name to store the database under
+#
 knowledgeBases = {}
 knowledgeBasesDirectory = 'chromadb'
 chroma_client = chromadb.Client(Settings(persist_directory=knowledgeBasesDirectory,chroma_db_impl="duckdb+parquet",))
@@ -136,10 +152,14 @@ def KBAdd(filename, chatlog):
     # Log output: save_file('db_logs/log_%s_split.txt' % time(), 'Split document %s, added %s:\n%s\n\n%s' % (kb_id, new_id, a1, a2))
     return memories[1], new_id
 
-# Chatlog management - profile === Username of the person you are talking with
+#
+# Chatlog management
+#   chatlog_name - Where to save the chatlog
+#   profile - Subcatagory for specifying storage
+#
 chatLogs = {}
-def chatInit(username, profile):
-    profile = username + '-' + profile
+def chatInit(chatlog_name, profile):
+    profile = chatlog_name + '-' + profile
     filepath = 'chatdb/'+ profile + '.json'
     if profile in chatLogs:
         save_json(filepath, chatLogs[profile])
@@ -147,12 +167,12 @@ def chatInit(username, profile):
     
     chatLogs[profile] = open_json(filepath)
     return chatLogs[profile]
-def chatAdd(username, profile, data):
-    chatlog = chatInit(username, profile)
+def chatAdd(chatlog_name, profile, data):
+    chatlog = chatInit(chatlog_name, profile)
     chatlog.append(data)
-    return chatInit(username, profile)
-def chatFetch(username, profile, entries=3):
-    chatlog = chatInit(username, profile)
+    return chatInit(chatlog_name, profile)
+def chatFetch(chatlog_name, profile, entries=3):
+    chatlog = chatInit(chatlog_name, profile)
     if (entries==-1):
         return chatlog
     if entries >= len(chatlog):
@@ -161,10 +181,9 @@ def chatFetch(username, profile, entries=3):
         return chatlog[-entries:]
 
 # Personality Profiles - Profile === human for which you are talking to
-userNotes = {}
-userNotesDirectory = 'user_profiles'
+userProfileDirectory = 'user_profiles'
 def userInit(filename):
-    return open_file(userNotesDirectory + '/' + filename + '.txt')
+    return open_file(userProfileDirectory + '/' + filename + '.txt')
 def userUpdate(filename, new_user_messages):
     # Get Current Profile
     current_profile = userInit(filename)
@@ -182,7 +201,7 @@ def userUpdate(filename, new_user_messages):
     new_profile = chatbot(profile_conversation)
 
     # Save updated profile
-    save_file(userNotesDirectory + '/' + filename + '.txt', new_profile)
+    save_file(userProfileDirectory + '/' + filename + '.txt', new_profile)
     return new_profile
 
 if __name__ == '__main__':
@@ -199,18 +218,6 @@ if __name__ == '__main__':
     #   --lang = language to use
     #   --persona = personality of the chatbot
     #   --topic = topic of conversation
-    #   
-    #   Example usage:
-    #   chat.py
-    #       --user=Taylor 
-    #       --save-chat=AI_Taylor_Private 
-    #       --save-kb=AI_Taylor_Private
-    #       --save-profile=Taylor_Private
-    #       --known-profiles=Taylor_Private,Taylor_Public
-    #       --known-kb=AI_Taylor_Private,AI_Taylor_Public << Anything works, It should be like Person1_Person2_Privacy or something similar to saved-chat
-    #       --lang=english
-    #       --AI-Personality="ReflectiveJournalingBot"
-    #       "What is jack's favorite food?"
     #
     current_user = "Rolyataylor2"
     save_chat = "AI_Rolyataylor2_Private"
@@ -218,9 +225,9 @@ if __name__ == '__main__':
     save_profile = "Rolyataylor2_Private"
     known_profiles = "Taylor_Private,Taylor_Public".split(',')
     known_kb = "AI_Taylor_Private,AI_Taylor_Public".split(',')
-    language = "english"
     ai_personality = "ReflectiveJournalingBot"
     conversation_topic = 'ethics'
+    conversation_language = "english"
     chatbot_action = 'general_chat'
     text = '\n\nHello my name is ' + current_user
 
@@ -243,17 +250,20 @@ if __name__ == '__main__':
     for i in known_kb:
         kb.append( KBSearch(known_kb[i], search_term, 1) ) # Fetch One Relavant conversation from the database
 
+    #TODO: Load known_profiles
+    other_profiles = list()
 
     #
     #   Load the script for GPT, Insert the arguments needed
     #
     user_profile = userInit(save_profile)
-    chatbot_process_script = chatbotFetchScript(chatbot_action)
+    chatbot_process_script = chatbotFetchAction(chatbot_action)
     chatbot_process_script = chatbot_process_script.replace('<<PROFILE>>', user_profile) # Add user profile into instructions
     chatbot_process_script = chatbot_process_script.replace('<<KB>>', ''.join(kb)) # Add long-term memory into instructions
+    chatbot_process_script = chatbot_process_script.replace('<<FRIEND_PROFILES>>', ''.join(other_profiles)) # Add user profile into instructions
+    chatbot_process_script = chatbot_process_script.replace('<<TOPIC>>', ''.join(conversation_topic)) # Add user profile into instructions
+    chatbot_process_script = chatbot_process_script.replace('<<LANG>>', ''.join(conversation_language)) # Add user profile into instructions
 
-    # @TODO Load profiles from known_profiles so the bot knows about the people in the conversation
-    
     #
     #   Execute conversation and recieve output
     #
