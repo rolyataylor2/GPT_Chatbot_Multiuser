@@ -39,8 +39,8 @@ To utilize the script, follow the steps below:
       --known-kb=AI_Taylor_Private,AI_Taylor_Public,AI_Jack_Public,AI_Thomas_public,AI_Tiki_Public 
       --lang=english 
       --AI-Personality=southernbell 
-      -lang=english 
-      -topic=economic_concerns 
+      --lang=english 
+      --topic=economic_concerns 
       "What is Jack's favorite food?"
    ```
 
