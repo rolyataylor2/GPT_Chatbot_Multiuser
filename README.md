@@ -41,7 +41,8 @@ To utilize the script, follow the steps below:
       --AI-Personality=southernbell 
       --lang=english 
       --topic=economic_concerns 
-      "What is Jack's favorite food?"
+      --action=survey_bot
+      "Hello my name is Taylor"
    ```
 
 4. Run the script by executing the following command:
