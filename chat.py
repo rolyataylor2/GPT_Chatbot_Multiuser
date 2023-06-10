@@ -3,6 +3,7 @@ from chromadb.config import Settings
 import openai
 from time import time, sleep
 from uuid import uuid4
+import json
 
 def save_file(filepath, content):
     with open(filepath, 'w', encoding='utf-8') as outfile:
@@ -13,6 +14,13 @@ def open_file(filepath):
     with open(filepath, 'r', encoding='utf-8', errors='ignore') as infile:
         return infile.read()
     
+def save_json(filepath, content):
+    save_file(filepath, json.dumps(content))
+
+
+def open_json(filepath):
+    return json.loads(open_file(filepath))
+  
 # GPT handler
 gpt_scripts_directory = 'gpt_scripts'
 def chatbot(messages, model="gpt-4", temperature=0):
@@ -130,18 +138,19 @@ def KBAdd(filename, chatlog):
 
 # Chatlog management - profile === Username of the person you are talking with
 chatLogs = {}
-# TODO: save to files and load from files
 def chatInit(username, profile):
     profile = username + '-' + profile
+    filepath = 'chatdb/'+ profile + '.json'
     if profile in chatLogs:
+        save_json(filepath, chatLogs[profile])
         return chatLogs[profile]
     
-    chatLogs[profile] = list()
+    chatLogs[profile] = open_json(filepath)
     return chatLogs[profile]
 def chatAdd(username, profile, data):
     chatlog = chatInit(username, profile)
     chatlog.append(data)
-    return 0
+    return chatInit(username, profile)
 def chatFetch(username, profile, entries=3):
     chatlog = chatInit(username, profile)
     if (entries==-1):
