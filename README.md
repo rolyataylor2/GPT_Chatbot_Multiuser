@@ -62,14 +62,31 @@ To utilize the script, follow the steps below:
 
    Additionally, the Chroma Database will be persisted to save all the conversation details.
 
-6. Use case scenerios
+6. Features
 
-   This script is intended to be used to provide the backend for a GUI frontend. Some features you can implement with this is:
+   What can you do with it?
    
    - Create an infinite number of conversations with the bot
    - Seperate out "Memories" the bot has about the conversations
    - Allow the bot to have "Relationships" with other users and share those "Memories" with the current user
    - Allow the user to "Know" a user via the known-profiles argument
 
+7. Use Case Scenerios
+
+   - Create a bot that can interject in conversations about past conversations
+   - The bot can talk about things that you are interested in with friends
+      - Say you are talking with the bot about your birthday coming up, the bot can mention that to your friends in casual conversation
+      - You are going to a concert soon, the bot could talk with your friends about it
+      - Something has happened to you and you want everyone to know but dont want to message them
+      - The bot could include your public KB's and make new friends for you
+   - The GUI should handle permissions between databases, Maybe allow the user to share certain databases with others
+      - You could have a work database that is shared with coworkers
+      - You could have a AI ethics database you share with AI ethics boards
+      - You can have a relationship database that you share with your significant others
+      - You can have a general likes and dislikes database you share with everyone
+   - Have a bot make decisions on your behalf
+      - Creating custom GPT_personalities would allow for the bot to use your KB and profile to chat on your behalf
+   - Custom GPT_Personalities for controlling devices
+      - Create a persona that can issue commands, This persona knows you through your KB and profile to allow it to customize those commands
 
 By using this script and configuring the appropriate user profiles and knowledge bases, you can customize the chatbot's level of knowledge about past conversations and the individuals it interacts with.
