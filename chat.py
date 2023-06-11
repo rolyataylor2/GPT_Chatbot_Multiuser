@@ -228,9 +228,9 @@ if __name__ == '__main__':
     save_profile = args.saveuser
     known_profiles = args.knownusers.split(',')
     known_kb = args.knownkbs.split(',')
-    ai_personality = args.persona
     conversation_topic = args.topic
     conversation_language = args.lang
+    chatbot_persona = args.persona
     chatbot_action = args.action
     text = args.say
 
@@ -247,20 +247,25 @@ if __name__ == '__main__':
     #
     search_term = chatFetch(save_chat, 'all_messages', 5) # Get the log of current conversation
     search_term = '\n\n'.join(search_term).strip() # Convert into a string
-    
-    # TODO: search all databases in known_kb variable
     kb = list()
     for i in known_kb:
         kb.append( KBSearch(known_kb[i], search_term, 1) ) # Fetch One Relavant conversation from the database
 
-    #TODO: Load known_profiles
+    #
+    #   Fetch other_profiles
+    #
     other_profiles = list()
+    for i in known_profiles:
+        other_profiles.append(userInit(known_profiles[i]))
+    
 
     #
     #   Load the script for GPT, Insert the arguments needed
     #
     user_profile = userInit(save_profile)
     chatbot_process_script = chatbotFetchAction(chatbot_action)
+    chatbot_persona_script = chatbotFetchPersona(chatbot_persona)
+    chatbot_process_script = chatbot_process_script.replace('<<PERSONA>>', chatbot_persona_script) # Add user profile into instructions
     chatbot_process_script = chatbot_process_script.replace('<<PROFILE>>', user_profile) # Add user profile into instructions
     chatbot_process_script = chatbot_process_script.replace('<<KB>>', ''.join(kb)) # Add long-term memory into instructions
     chatbot_process_script = chatbot_process_script.replace('<<FRIEND_PROFILES>>', ''.join(other_profiles)) # Add user profile into instructions
@@ -286,6 +291,7 @@ if __name__ == '__main__':
     latest_user_outputs = '\n'.join(chatFetch(save_chat,'user_messages',3)).strip()
     userUpdate(save_profile, latest_user_outputs) # Update user profile with latest notes
 
+    # TODO: Label each KB with the context (user & date)
     lastest_conversation = '\n\n'.join(chatFetch(save_chat,'all_messages', 5)).strip()
     KBAdd(save_kb, lastest_conversation) # Update longterm Memory with lastest conversation
 
