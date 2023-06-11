@@ -158,9 +158,10 @@ def KBAdd(filename, chatlog):
 #   profile - Subcatagory for specifying storage
 #
 chatLogs = {}
+chatLogDirectory = 'chatdb'
 def chatInit(chatlog_name, profile):
     profile = chatlog_name + '-' + profile
-    filepath = 'chatdb/'+ profile + '.json'
+    filepath = chatLogDirectory + '/' + profile + '.json'
     if profile in chatLogs:
         save_json(filepath, chatLogs[profile])
         return chatLogs[profile]
