@@ -5,6 +5,8 @@ from time import time, sleep
 from uuid import uuid4
 import json
 import argparse
+import sys
+
 
 #
 #   Helper Functions
@@ -13,15 +15,24 @@ def save_file(filepath, content):
     with open(filepath, 'w', encoding='utf-8') as outfile:
         outfile.write(content)
 
-def open_file(filepath):
-    with open(filepath, 'r', encoding='utf-8', errors='ignore') as infile:
-        return infile.read()
+def open_file(filepath,create_if_not_found=True):
+    try:
+        with open(filepath, 'r', encoding='utf-8', errors='ignore') as infile:
+            return infile.read()
+    except FileNotFoundError:
+        if create_if_not_found:
+            return ""
+        else:
+            raise
     
 def save_json(filepath, content):
     save_file(filepath, json.dumps(content))
 
-def open_json(filepath):
-    return json.loads(open_file(filepath))
+def open_json(filepath, default_object={}):
+    data = open_file(filepath)
+    if data == '':
+        return default_object
+    return json.loads(data)
   
 #
 # GPT handler
@@ -87,10 +98,7 @@ def KBInit(filename):
     
     # Initiate collection if 0 logs exist
     if collection.count() == 0:
-        kb_conversation = list()
-        kb_conversation.append({'role': 'system', 'content': chatbotFetchScript('kb_init')})
-        kb_conversation.append({'role': 'user', 'content': 'Hello'})
-        article = chatbot(kb_conversation)
+        article = "Beginning of a new set of long term memories"
         new_id = str(uuid4())
         collection.add(documents=[article],ids=[new_id])
 
@@ -166,7 +174,7 @@ def chatInit(chatlog_name, profile):
         save_json(filepath, chatLogs[profile])
         return chatLogs[profile]
     
-    chatLogs[profile] = open_json(filepath)
+    chatLogs[profile] = open_json(filepath,[])
     return chatLogs[profile]
 def chatAdd(chatlog_name, profile, data):
     chatlog = chatInit(chatlog_name, profile)
@@ -183,8 +191,11 @@ def chatFetch(chatlog_name, profile, entries=3):
 
 # Personality Profiles - Profile === human for which you are talking to
 userProfileDirectory = 'user_profiles'
-def userInit(filename):
-    return open_file(userProfileDirectory + '/' + filename + '.txt')
+def userInit(filename, create_default=False):
+    data = open_file(userProfileDirectory + '/' + filename + '.txt')
+    if data == '' and create_default == True:
+        return open_file(userProfileDirectory + '/_new_profile.txt')
+    return data
 def userUpdate(filename, new_user_messages):
     # Get Current Profile
     current_profile = userInit(filename)
@@ -209,18 +220,21 @@ if __name__ == '__main__':
     # instantiate chatbot
     openai.api_key = open_file('key_openai.txt')
 
+    # 
+    #   Handle arguments
+    #
     parser = argparse.ArgumentParser()
-    parser.add_argument("-user", help="The name of the user chatting with the bot. String 'Taylor'.")
+    parser.add_argument("-user", help="The profile of the user chatting with the bot. String 'Taylor-Public'.")
     parser.add_argument("-savechat", help="Name of the chatlog to save and continue from. String 'Taylor-AI-Conversation'.")
     parser.add_argument("-savekb", help="KBs to update with new text. String 'Taylor-private'.")
-    parser.add_argument("-saveuser", help="Userprofile to save too. String 'Taylor-private'.")
+    parser.add_argument("-saveuser", help="User profile to save too. String 'Taylor-private'.")
     parser.add_argument("-knownusers", help="Profiles that the AI knows about. Comma-seprated string 'Taylor-private,Taylor-public'.")
     parser.add_argument("-knownkbs", help="Knowledge bases to pull information from. Comma-seprated string 'kbone,kbtwo,kbthree'.")
-    parser.add_argument("-action", help="Action to use be taken from gpt_actions directory. Default 'General_Chat'.")
+    parser.add_argument("-action", help="Action to use be taken from gpt_actions directory. Default 'default_chat'.")
     parser.add_argument("-lang", help="Language that the bot should use. Default 'English'.")
-    parser.add_argument("-persona", help="How the bot should behave based on script in gpt_personas. Default 'ReflectiveJournalingBot'.")
-    parser.add_argument("-topic", help="Set a topic to talk about. Default ''.")
-    parser.add_argument("-say", help="What to say to the bot.. Hello bot! Nice to see you!")
+    parser.add_argument("-persona", help="How the bot should behave based on script in gpt_personas. Default 'Louis_Theroux'.")
+    parser.add_argument("-topic", help="Set a topic to talk about. Default is 'No Topic Selected'.")
+    parser.add_argument("-say", help="What to say to the bot.. Hello bot! Nice to meet you!")
     args = parser.parse_args()
 
     current_user = args.user
@@ -233,7 +247,7 @@ if __name__ == '__main__':
     conversation_language = args.lang
     chatbot_persona = args.persona
     chatbot_action = args.action
-    text = args.say
+    text = current_user + ":" + args.say
 
     # 
     #   Save Chat Logs
@@ -249,35 +263,41 @@ if __name__ == '__main__':
     search_term = chatFetch(save_chat, 'all_messages', 5) # Get the log of current conversation
     search_term = '\n\n'.join(search_term).strip() # Convert into a string
     kb = list()
-    for i in known_kb:
-        kb.append( KBSearch(known_kb[i], search_term, 1) ) # Fetch One Relavant conversation from the database
+    for kb_name in known_kb:
+        kb_text, kb_id = KBSearch(kb_name, search_term, 1)
+        if kb_text != "No new KB article could be created based on the given chat logs.":
+            kb.append( '<memory>' + kb_text + '</memory>' ) # Fetch One Relavant conversation from the database
 
     #
     #   Fetch other_profiles
     #
     other_profiles = list()
-    for i in known_profiles:
-        other_profiles.append(userInit(known_profiles[i]))
-    
+    for profile_name in known_profiles:
+        profile_text = userInit(profile_name)
+        if profile_text != '':
+            other_profiles.append('<person>' + userInit(profile_name) + '</person>')
+
 
     #
     #   Load the script for GPT, Insert the arguments needed
     #
-    user_profile = userInit(save_profile)
-    chatbot_process_script = chatbotFetchAction(chatbot_action)
+    user_profile = '<person>' + userInit(current_user, True) + '</person>'
     chatbot_persona_script = chatbotFetchPersona(chatbot_persona)
+    chatbot_process_script = chatbotFetchAction(chatbot_action)
     chatbot_process_script = chatbot_process_script.replace('<<PERSONA>>', chatbot_persona_script) # Add user profile into instructions
     chatbot_process_script = chatbot_process_script.replace('<<PROFILE>>', user_profile) # Add user profile into instructions
     chatbot_process_script = chatbot_process_script.replace('<<KB>>', ''.join(kb)) # Add long-term memory into instructions
     chatbot_process_script = chatbot_process_script.replace('<<FRIEND_PROFILES>>', ''.join(other_profiles)) # Add user profile into instructions
     chatbot_process_script = chatbot_process_script.replace('<<TOPIC>>', ''.join(conversation_topic)) # Add user profile into instructions
     chatbot_process_script = chatbot_process_script.replace('<<LANG>>', ''.join(conversation_language)) # Add user profile into instructions
-
+    chatbot_process_script = chatbot_process_script.replace('\n',' ').replace('  ',' ')
+    
     #
     #   Execute conversation and recieve output
     #
     current_conversation = chatFetch(save_chat,'conversation',-1) # Pull entire conversation JSONS
     current_conversation[0]['content'] = chatbot_process_script # Update last message content
+
     response = chatbot(current_conversation) # Fetch response
     print('\n\nCHATBOT: %s' % response) # Output
 

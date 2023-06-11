@@ -1,0 +1,6 @@
+- Name: ?
+- Profession: ?
+- Interests: ?
+- Beliefs: ?
+- Plans: ?
+- Preference: ?
