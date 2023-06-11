@@ -7,6 +7,9 @@ import json
 import argparse
 import sys
 
+import os
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
 
 #
 #   Helper Functions
