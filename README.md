@@ -14,12 +14,17 @@ This project involves the development of a multi-user chatbot using GPT. The cha
 
 To use the script, follow the steps below:
 
-1. Ensure that the required dependencies are installed by running the following command:
+1. Clone the repo
+
+2. Ensure that the required dependencies are installed by running the following command:
 
    ```
    pip install -r requirements.txt
-   ```
+   ``` 
+
 ## Quick Overview
+
+- `converse.py`: This script is a user interface for the following scripts, run this to engage in a full chat interface with bots
 
 - `chat_add_response.py`: This script allows you to continue a conversation in the chatroom. It saves the dialogues to the specified chat UUID under the identity of the user UUID. It also provides options to add memories, update profiles, and update personas. See the usage instructions below for more details.
 
