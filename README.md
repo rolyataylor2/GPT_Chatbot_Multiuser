@@ -1,6 +1,14 @@
-# Chatbot Interaction Script
+# Multi-user Chatbot Project
 
-This script allows a particular user to interact with a chatbot that utilizes the memories stored in known knowledge bases (KBs). The chatbot can access and update the KBs specified in the savekb parameter. Additionally, the script enables the chatbot to be aware of user profiles defined in the knownusers parameter. These profiles determine the level of knowledge the chatbot possesses about past conversations and the individuals it has interacted with.
+This project involves the development of a multi-user chatbot using GPT. The chatbot is capable of generating responses, continuing conversations, saving dialogues to chatrooms, and updating profiles, personas, and memories. It provides a versatile platform for interactive communication.
+
+## Save the relevant details of the conversation:
+
+   The bot will do the following on each run:
+
+   - Chat logs will be saved with the specified name in the savechat parameter.
+   - User profiles will be updated with the latest information.
+   - Knowledge bases (KBs) will be updated with the new conversation text.
 
 ## Usage
 
@@ -11,59 +19,139 @@ To use the script, follow the steps below:
    ```
    pip install -r requirements.txt
    ```
+## Quick Overview
 
-2. Set up the necessary configuration files, including:
+- `chat_add_response.py`: This script allows you to continue a conversation in the chatroom. It saves the dialogues to the specified chat UUID under the identity of the user UUID. It also provides options to add memories, update profiles, and update personas. See the usage instructions below for more details.
 
-   - `key_openai.txt`: Provide your OpenAI API key in this file.
+- `chatbot_gen.py`: This script generates a bot response to the chatroom and saves it. It also adds memories, updates profiles, and personas. See the usage instructions below for more details.
 
-3. Configure the script by providing the required command-line arguments:
+- `chatbot_gen_response.py`: This script generates a response to the context of a chatroom with the identity of a user. It follows the specified action from the `gpt_actions` directory. This script does not modify any long-term data. See the usage instructions below for more details.
 
-   - `-user`: Specify the username of the person interacting with the chatbot.
-   - `-savechat`: Specify the name of the chat log to be saved and continued from.
-   - `-savekb`: Specify the KBs to be updated with new text.
-   - `-saveuser`: Specify the user profile to save to.
-   - `-knownusers`: Define the profiles that the chatbot is aware of (comma-separated).
-   - `-knownkbs`: Specify the KBs the chatbot can access (comma-separated).
-   - `-action`: Specify the type of action to be taken from the gpt_actions directory (default: General_Chat).
-   - `-lang`: Specify the language the bot should use (default: English).
-   - `-persona`: Specify how the bot should behave based on the script in the gpt_personas directory (default: ReflectiveJournalingBot).
-   - `-topic`: Set a topic to talk about (default: empty).
-   - `-say`: Specify what to say to the bot.
+### Common Flags in the scripts
 
-4. Run the script by executing the following command:
+```
+  -h, --help        show help message and exit
+  -userUUID         User-UUID
+  -chatUUID         Chatroom-UUID
+  -apikey           Your OpenAI API key. CAUTION: $$$
 
-   ```
-   python chat.py -user Taylor 
-      -savechat Taylor-AI-Conversation 
-      -savekb Taylor-private 
-      -saveuser Taylor-private 
-      -knownusers Taylor-private,Taylor-public 
-      -knownkbs Taylor-private,Taylor-public 
-      -action General_Chat 
-      -lang English 
-      -persona ReflectiveJournalingBot 
-      -topic '' 
-      -say "Hello bot! Nice to see you!"
-   ```
+  -savekbs          Merge Into Additional KBs:
+                    Type: Comma-Delimited-List
+                    Always updates: $chatUUID,$userUUID
 
-   The script will initiate the conversation with the chatbot based on the provided arguments and display the chatbot's responses in the terminal.
+  -savepersona      Merge Additional Personas
+                    Type: Comma-Delimited-List
+                    Always updates: $userUUID
 
-## Save the relevant details of the conversation:
+  -saveprofile      Merge Additional Profiles
+                    Type: Comma-Delimited-List
+                    Always updates: $userUUID
 
-   The bot will do the following on each run:
+  -knownusers       Profiles of bot's friends
+                    Always has access to: $userUUID
+                    If the name contains 'public', the bot will not try to hide details
+                    CAUTION: Pure UUIDs are private; bots can't keep secrets
 
-   - Chat logs will be saved with the specified name in the savechat parameter.
-   - User profiles will be updated with the latest information.
-   - Knowledge bases (KBs) will be updated with the new conversation text.
+  -knownkbs         Memory Databases for the bot
+                    Always has access to: $userUUID
+                    CAUTION: These are not kept secret
+
+  -freezekb         Don't write personal KBs
+  -freezepersona    Don't write personal persona
+  -freezeprofile    Don't write personal profile
+  -action           Action to be taken from the gpt_actions directory
+  -language         Language that the bot should use. Default is 'English'
+  -persona          Override bot's persona using one from the 'gpt_personas' directory
+  -topic            Set a topic to talk about
+```
+
+## Script Details
+
+### chat_add_response.py
+
+This script allows you to add a response to a chatroom in the multi-user chatbot. It performs the following actions:
+
+- Saves the provided dialogue to the specified chatroom.
+- Associates the response with the identity of the user.
+- Updates profiles, personas, and memories.
+
+#### Usage
+
+```shell
+python3 chat_add_response.py -userUUID [User-UUID] -chatUUID [Chatroom-UUID] -dialog [Dialog to save to the chat] -apikey [Your OpenAI API key]
+```
+
+Optional arguments:
+
+- `-savekbs`: Merges into additional knowledge bases. Type: Comma-Delimited-List. Always updates: [Chatroom-UUID],[User-UUID].
+- `-savepersona`: Merges additional personas. Type: Comma-Delimited-List. Always updates: [User-UUID].
+- `-saveprofile`: Merges additional profiles. Type: Comma-Delimited-List. Always updates: [User-UUID].
+- `-freezekb`: Prevents writing personal knowledge bases.
+- `-freezepersona`: Prevents writing personal personas.
+- `-freezeprofile`: Prevents writing personal profiles.
+
+### chatbot_gen.py
+
+This script generates a bot response for a chatroom in the multi-user chatbot. It performs the following actions:
+
+- Generates a response based on the provided chatroom.
+- Saves the response to the chatroom.
+- Updates profiles, personas, and memories.
+
+#### Usage
+
+```shell
+python3 chatbot_gen.py -userUUID [User-UUID] -chatUUID [Chatroom-UUID] -apikey [Your OpenAI API key]
+```
+
+Optional arguments:
+
+- `-savekbs`: Merges into additional knowledge bases. Type: Comma-Delimited-List. Always updates: [Chatroom-UUID],[User-UUID].
+- `-savepersona`: Merges additional personas. Type: Comma-Delimited-List. Always updates: [User-UUID].
+- `-saveprofile`: Merges additional profiles. Type: Comma-Delimited-List. Always updates: [User-UUID].
+- `-knownusers`: Profiles of bot's friends. Always has access to: [User-UUID]. If the name contains 'public,' the bot will not try to hide details.
+- `-knownkbs`: Memory databases for the bot. Always has access to: [User-UUID].
+- `-freezekb`: Prevents writing personal knowledge bases.
+- `-freezepersona`: Prevents writing personal personas.
+- `-freezeprofile`: Prevents writing personal profiles.
+- `-action`: Action to be taken from the `gpt_actions` directory.
+- `-language`: Language that the bot should use. Default is 'English'.
+- `-persona`: Overrides the bot's persona using one from the `gpt_personas` directory.
+- `-topic`: Sets a topic to talk about.
+
+### chatbot_gen_response.py
+
+This script generates a response to a chatroom conversation in the multi-user chatbot. It performs the following actions:
+
+- Generates a response based on the provided chatroom and user identity.
+- Follows the direction specified by the action from the `gpt_actions` directory.
+- Does not modify any long-term data.
+
+####
+
+ Usage
+
+```shell
+python3 chatbot_gen_response.py -userUUID [User-UUID] -chatUUID [Chatroom-UUID] -apikey [Your OpenAI API key]
+```
+
+Optional arguments:
+
+- `-knownusers`: Profiles of bot's friends. Always has access to: [User-UUID]. If the name contains 'public,' the bot will not try to hide details.
+- `-knownkbs`: Memory databases for the bot. Always has access to: [User-UUID].
+- `-action`: Action to be taken from the `gpt_actions` directory.
+- `-language`: Language that the bot should use. Default is 'English'.
+- `-persona`: Overrides the bot's persona using one from the `gpt_personas` directory.
+- `-topic`: Sets a topic to talk about.
 
 ## Features
 
-   This bot contains the ability to form and recall "Memories" from conversations while also forming "Relationships" with user profiles. Fine control of the bots "Memories", "Relationships" and "Knowledge" can be fine-tuned to the context. The power and flexability comes to light when you customize the bot via command line arguments to adapt to conversations and people.
-   
-   - Create an infinite number of conversations with the bot
-   - Seperate out "Memories" the bot has about the conversations
-   - Allow the bot to have "Relationships" with other users and share those "Memories" with the current user
-   - Allow the user to "Know" a user via the known-profiles argument
+- Multi-user chatbot system for interactive communication.
+- Ability to add responses to chatrooms.
+- Generation of bot responses for chatrooms.
+- Flexible customization of profiles, personas, and memories.
+- Integration with knowledge bases, actions, and topics.
+- Easy setup and configuration using command-line arguments.
 
 ## Use Case Scenerios
    
@@ -92,9 +180,10 @@ To use the script, follow the steps below:
    Using persona scripts you may be able to have the bot answer questions using your KB and your Profile which may allow for the bot to answer questions on your behalf
    - Maybe a friend can ask the YOU BOT what your favorite food is. The YOU BOT could answer this.
 
-## Future Features
 
-   -Allow for a -noaction flag to allow the KB and personaly profiles to be updated without the bot being a part of the conversation
-
-## Conclusion
-By using this script and configuring the appropriate user profiles and knowledge bases, you can customize the chatbot's level of knowledge about past conversations and the individuals it interacts with.
+   This bot contains the ability to form and recall "Memories" from conversations while also forming "Relationships" with user profiles. Fine control of the bots "Memories", "Relationships" and "Knowledge" can be fine-tuned to the context. The power and flexability comes to light when you customize the bot via command line arguments to adapt to conversations and people.
+   
+   - Create an infinite number of conversations with the bot
+   - Seperate out "Memories" the bot has about the conversations
+   - Allow the bot to have "Relationships" with other users and share those "Memories" with the current user
+   - Allow the user to "Know" a user via the known-profiles argument
