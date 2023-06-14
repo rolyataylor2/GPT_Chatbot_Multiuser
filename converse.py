@@ -120,7 +120,6 @@ if __name__ == '__main__':
     lnfeed()
 
     apikey = input('Whats your OpenAI key: ')
-    apikey = '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'
     lnfeed()
 
     # Get user
