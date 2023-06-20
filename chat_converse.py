@@ -1,81 +1,15 @@
-import os
+#
+# Imports
+#
+import os, sys
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/System/imports')
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/System/gpt-observers')
 os.system('cls' if os.name == 'nt' else 'clear')
 
-#
-#   Helper Functions
-#
-def save_file(filepath, content):
-    with open(filepath, 'w', encoding='utf-8') as outfile:
-        outfile.write(content)
-def open_file(filepath,create_if_not_found=True):
-    try:
-        with open(filepath, 'r', encoding='utf-8', errors='ignore') as infile:
-            return infile.read()
-    except FileNotFoundError:
-        if create_if_not_found:
-            return ""
-        else:
-            raise
-
-import json
-def save_json(filepath, content):
-    save_file(filepath, json.dumps(content))
-def open_json(filepath, default_return=[]):
-    # Load file
-    data = open_file(filepath)
-    if data == '':
-        return default_return
-    return json.loads(data)
-
-def center_string(string, width):
-    if len(string) >= width:
-        return string  # No need for padding if string is already equal to or longer than the width
-    string = ' ' + string + ' '
-    padding = width - len(string)
-    left_padding = padding // 2
-    right_padding = padding - left_padding
-
-    centered_string = ' ' * left_padding + string + ' ' * right_padding
-    return ' |' + centered_string + '|'
-def inputBool(prompt):
-    while True:
-        user_input = input(prompt)
-        if user_input.upper() == 'Y':
-            return 'Y'
-        elif user_input.upper() == 'N':
-            return 'N'
-        else:
-            print("Invalid input. Please enter 'Y' or 'N'")
-
-#
-#   Profile management
-#
-userProfileDirectory = 'gpt_profiles'
-def userInit(profile_name):
-    data = open_file(userProfileDirectory + '/' + profile_name + '.txt')
-    return data
-
-#
-#   Chatlog management
-#
-chatLogDirectory = 'chatdb'
-def chatSync(chatlog_name, catagory):
-    # Store under catagory
-    profile = chatlog_name + '-' + catagory
-    filepath = chatLogDirectory + '/' + profile + '.json'
-
-    # Return the log
-    return open_json(filepath, [])
-def chatFetch(chatlog_name, catagory, entries=3):
-    # Load
-    chatlog = chatSync(chatlog_name, catagory)
-    # Splice
-    if (entries==-1):
-        return chatlog
-    if entries >= len(chatlog):
-        return chatlog
-    else:
-        return chatlog[-entries:]
+import functions_helper as file
+import functions_profile as profile
+import functions_chatlog as chat
+import functions_generate as bot
 
 import subprocess
 def run_script_with_output(script_path, arguments=[]):
@@ -105,7 +39,25 @@ def run_script_with_output(script_path, arguments=[]):
         print(f"Error running script: {e}")
     
     return None
+def center_string(string, width):
+    if len(string) >= width:
+        return string  # No need for padding if string is already equal to or longer than the width
+    string = ' ' + string + ' '
+    padding = width - len(string)
+    left_padding = padding // 2
+    right_padding = padding - left_padding
 
+    centered_string = ' ' * left_padding + string + ' ' * right_padding
+    return ' |' + centered_string + '|'
+def inputBool(prompt):
+    while True:
+        user_input = input(prompt)
+        if user_input.upper() == 'Y':
+            return 'Y'
+        elif user_input.upper() == 'N':
+            return 'N'
+        else:
+            print("Invalid input. Please enter 'Y' or 'N'")
 def lnfeed():
     print('\n')
 
@@ -119,15 +71,11 @@ if __name__ == '__main__':
     print('<========================================================>')
     lnfeed()
 
-    apikey = input('Whats your OpenAI key: ')
-    lnfeed()
-
     # Get user
     current_user = input('Username you will identify with: ')
     if current_user == '':
         current_user = 'DefaultUser'
-    profile = userInit(current_user)
-    if profile == '':
+    if profile.get(current_user) == '':
         print(' * This profile does not exist, Creating new profile for ' + current_user)
     else:
         print(' * Welcome back, ' + current_user)
@@ -138,8 +86,7 @@ if __name__ == '__main__':
     if current_bot == '':
         current_bot = 'DefaultBot'
 
-    profile = userInit(current_bot)
-    if profile != '':
+    if profile.get(current_bot) != '':
         print(' * Bot Found: ' + current_bot)
     else:
         print(' * Bot not found: ' + current_bot)
@@ -149,8 +96,8 @@ if __name__ == '__main__':
     answer = input('Load Settings (blank=default_settings, anything_else=advanced):')
     if (answer == ''):
         answer = 'default_settings'
-    
-    settings = open_json('converse_settings/' + answer + '.json', {})
+    settings_directory = 'System/settings/'
+    settings = file.open_json(settings_directory + answer + '.json', {})
     if settings == {}:
         os.system('cls' if os.name == 'nt' else 'clear')
         print('<========================================================>')
@@ -225,7 +172,7 @@ if __name__ == '__main__':
 
         answer = input('Save these settings (Name, blank=skip): ')
         if answer != '':
-            save_json('converse_settings/' + answer + '.json', settings)
+            file.save_json(settings_directory + answer + '.json', settings)
 
 
 
@@ -235,7 +182,7 @@ if __name__ == '__main__':
     current_chat = input('Enter the name of the chat: ')
     if current_chat == '':
         current_chat = 'main'
-    chatlog = chatFetch(current_chat,'all_messages',-1)
+    chatlog = chat.fetch(current_chat,'all_messages',-1)
     chatlength = str(len(chatlog))
 
     while True:
@@ -250,73 +197,67 @@ if __name__ == '__main__':
         print(center_string('Conversation is saved to: ' + current_chat, 54))
         print(center_string('Conversation Length: ' + chatlength, 54))
         print(center_string(' ', 54))
-        print(center_string('API Key: ' + apikey, 54))
-        print(center_string(' ', 54))
         print('<========================================================>')
-        chatlog = chatFetch(current_chat, 'all_messages', 10)
+        chatlog = chat.fetch(current_chat, 'all_messages', 10)
         for message in chatlog:
             print(message)
 
         # get user input
-        current_dialog = input('USER: ')
+        current_dialog = input(current_user + ': ')
 
         #
-        #   Add Chat
+        #   Add Human Chat
+        #
+        print('Adding User Repsonse To Chat...')
+        chat.add(current_chat, 'user_' + current_user, current_dialog) # Add user message to personal log
+        chat.add(current_chat, 'all_messages', current_user + ': ' + current_dialog) # Add user message to merged conversation log
+        chat.add(current_chat, 'conversation', {'role': 'user', 'content': current_user + ': ' + current_dialog})
+
+        #
+        #   Generate a bot response
+        #
+        known_kb = settings['bot_knownkbs'].split(',')
+        if settings['bot_knownkbs'] == '':
+            known_kb = []
+
+        known_profiles = {}
+        known_profiles[ current_bot ] = [ 'personality', 'emotional_state', 'attention', 'beliefs', 'preferences' ]
+        known_profiles[ current_user ] = [ 'personality', 'emotional_state', 'attention', 'beliefs', 'preferences' ]
+        print('Generating Bots Repsonse To Chat...')
+        generated_text = bot.generate(current_bot, current_chat, known_kb, known_profiles)
+        print('Bot Said: ' + generated_text)
+
+        #
+        #   Add Bot Chat
+        #
+        print('Adding Bots Repsonse To Chat...')
+        chat.add(current_chat, 'user_' + current_bot, generated_text) # Add user message to personal log
+        chat.add(current_chat, 'all_messages', current_bot + ': ' + generated_text) # Add user message to merged conversation log
+        chat.add(current_chat, 'conversation', {'role': 'user', 'content': current_bot + ': ' + generated_text})
+
+        #
+        #   Generate KB
         #
         arguments = list()
-        arguments.extend(["-apikey", apikey])
-
         arguments.extend(["-userUUID", current_user])
         arguments.extend(["-chatUUID", current_chat])
-        arguments.extend(["-dialog", current_dialog])
-        
+        arguments.extend(["-selection", '5'])
 
-        # Optional arguments
-        arguments.extend(["-savekbs", settings['user_savekbs']])
-        arguments.extend(["-savepersona", settings['user_savepersona']])
-        arguments.extend(["-saveprofile", settings['user_saveprofile']])
-        
-        arguments.extend(["-freezekb", settings['user_freezekb']])
-        arguments.extend(["-freezepersona", settings['user_freezepersona']])
-        arguments.extend(["-freezeprofile", settings['user_freezeprofile']])
+        savekbs = settings['user_savekbs'] + ','
+        if savekbs == ',':
+            savekbs = ''
+        savekbs += ('-'.join([current_user, current_bot]))
+        savekbs += ',' + current_bot
+        arguments.extend(["-savekbs", savekbs]) # Also include current_user + current_bot << sort by name though or else youll have to make 2 copies
+        arguments.extend(["-freezekb", 'N'])
 
-        script_path = "chat_add_response.py"
-
-        print('Adding User Repsonse To Chat')
-        success = run_script_with_output(script_path, arguments)
+        print('Creating a memory of the chat...')
+        success = run_script_with_output("update_kb.py", arguments)
         print(success)
 
         #
-        #   Facilitate Response
+        #    Update Observations
         #
-        arguments = list()
-        arguments.extend(["-apikey", apikey])
-
-        arguments.extend(["-userUUID", current_bot])
-        arguments.extend(["-chatUUID", current_chat])
         
-
-        # Optional arguments
-        # arguments.extend(["-savekbs", settings['bot_savekbs']])
-        # arguments.extend(["-savepersona", settings['bot_savepersona']])
-        arguments.extend(["-saveprofile", settings['bot_saveprofile']])
-
-        arguments.extend(["-freezekb", settings['bot_freezekb']])
-        arguments.extend(["-freezepersona", settings['bot_freezepersona']])
-        arguments.extend(["-freezeprofile", settings['bot_freezeprofile']])
-
-        arguments.extend(["-knownusers", settings['bot_knownusers']])
-        arguments.extend(["-knownkbs", settings['bot_knownkbs']])
-        arguments.extend(["-persona", settings['bot_persona']])
-
-        # arguments.extend(["-action", settings['action']])
-        # arguments.extend(["-lang", settings['language']])
-        # arguments.extend(["-topic", settings['topic']])
-
-        script_path = "chatbot_gen.py"
-
-        print('Adding Bots Repsonse To Chat')
-        success = run_script_with_output(script_path, arguments)
-        print(success)
 
         input('Press enter to continue.')
