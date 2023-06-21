@@ -24,7 +24,7 @@ RULES:
 import functions_chatlog as chatlog
 import functions_chatbot as chatbot
 import functions_helper as file
-import functions_profile as profile
+import functions_observer as profile
 import time, json
 def Get(userUUID):
     current_state = profile.get(userUUID + '.atten')

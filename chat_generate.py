@@ -38,7 +38,7 @@ args = parser.parse_args()
 import functions_chatbot as chatbot
 import functions_kb as kb
 import functions_chatlog as chatlog
-import functions_profile as profile
+import functions_observer as profile
 chatActionDirectory = 'System/gpt-actions'
 
 

@@ -1,5 +1,5 @@
 
-import functions_profile as profile
+import functions_observer as profile
 import functions_chatbot as chatbot
 import uuid
 import functions_chatlog as chatlog

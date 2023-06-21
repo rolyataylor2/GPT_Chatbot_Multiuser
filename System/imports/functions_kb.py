@@ -47,12 +47,14 @@ def create_keywords(text):
     messages.append({'role': 'system', 'content': system})
     messages.append({'role': 'user', 'content': text})
     return chatbot.execute(messages)
+
+import re
 def create_title(text):
     system = chatbot.getScript('FS_KB_Create_Title')
     messages = []
     messages.append({'role': 'system', 'content': system})
     messages.append({'role': 'user', 'content': text})
-    return chatbot.execute(messages)[:30]
+    return re.sub(r'[^a-zA-Z0-9]', '', chatbot.execute(messages)[:30])
 def create_description(text):
     system = chatbot.getScript('FS_KB_Create_Description')
     
@@ -92,6 +94,7 @@ def merge(article, article2):
 def update(kb_names, text):
     # Create a memory
     memory = create(text)
+    hybrid_memory = ''
 
     # Save to kbs
     for kb in kb_names:
@@ -105,12 +108,19 @@ def update(kb_names, text):
 
         # No memory found, so save this one
         if len(file_list) == 0:
+            print('Creating memories in file: ', directory + memory['title'] + '.json')
+            file.save_json(directory + memory['title'] + '.json', memory)
+            update_directory(kb)
+            continue
+        
+        if hybrid_memory != '':
+            print('Copying memories in file: ', directory + memory['title'] + '.json')
             file.save_json(directory + memory['title'] + '.json', memory)
             update_directory(kb)
             continue
        
         # Merge new memory with old memory
-        print('Updating memories in file: ', directory + file_list[0])
+        print('Updating memories in file: ', directory + memory['title'] + '.json')
         article = file.open_json(directory + file_list[0])
         hybrid_memory = merge(article, memory)
         file.save_json(directory + file_list[0], hybrid_memory)
@@ -131,7 +141,7 @@ def search(kb_name, query, filenames_only=False):
     messages.append({'role': 'system', 'content': system})
     messages.append({'role': 'user', 'content': query})
     response = chatbot.execute(messages)
-    print('Filenames: ', response)
+    
     try:
         filenames = json.loads(response)
         filenames['concat'] = ''

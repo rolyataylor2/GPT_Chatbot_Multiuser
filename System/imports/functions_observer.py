@@ -8,6 +8,17 @@ userProfileDirectory = 'Profiles'
 #
 #   Manage Profiles
 #
+import importlib
+def observe(observer_name, userUUID, chatUUID):
+    module_name = 'OB_' + observer_name
+    module = importlib.import_module(module_name)
+    return module.observe(userUUID, chatUUID)
+
+def get_observation(observer_name, UUID):
+    module_name = 'OB_' + observer_name
+    module = importlib.import_module(module_name)
+    return module.get(UUID)
+
 def get(profile_name, create_default=False):
     data = file.open_file(userProfileDirectory + '/' + profile_name + '.txt')
     if data == '' and create_default == True:

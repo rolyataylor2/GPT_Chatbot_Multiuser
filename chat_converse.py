@@ -7,7 +7,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/System/gpt-observ
 os.system('cls' if os.name == 'nt' else 'clear')
 
 import functions_helper as file
-import functions_profile as profile
+import functions_observer as observer
 import functions_chatlog as chat
 import functions_generate as bot
 
@@ -75,22 +75,14 @@ if __name__ == '__main__':
     current_user = input('Username you will identify with: ')
     if current_user == '':
         current_user = 'DefaultUser'
-    if profile.get(current_user) == '':
-        print(' * This profile does not exist, Creating new profile for ' + current_user)
-    else:
-        print(' * Welcome back, ' + current_user)
+        print('    You are being assigned: ', current_user)
     lnfeed()
 
     # Get bot
     current_bot = input('Username the bot identify with: ')
     if current_bot == '':
         current_bot = 'DefaultBot'
-
-    if profile.get(current_bot) != '':
-        print(' * Bot Found: ' + current_bot)
-    else:
-        print(' * Bot not found: ' + current_bot)
-        # @TODO Select a persona and copy that to the bots name
+        print('    The bot is being assigned: ', current_bot)
     lnfeed()
 
     answer = input('Load Settings (blank=default_settings, anything_else=advanced):')
@@ -184,6 +176,42 @@ if __name__ == '__main__':
         current_chat = 'main'
     chatlog = chat.fetch(current_chat,'all_messages',-1)
     chatlength = str(len(chatlog))
+    def format_user_input(text):
+        # Split the text into username and user message
+        username, message = text.split(': ')
+
+        # Calculate the sum of ASCII values of the username characters
+        ascii_sum = sum(ord(char) for char in username) * 3
+
+        # Calculate the text color based on the ASCII sum (0-255)
+        text_color = ascii_sum % 256
+
+        # Calculate the background color by subtracting a fixed value (e.g., 40) from the text color
+        background_color = (text_color - 40) % 256
+
+        # Calculate the font color as the opposite of the background color
+        font_color = (background_color + 128) % 256
+
+        # Format the username with the calculated font and background colors, and left-justify
+        formatted_username = f'\033[38;5;{font_color};48;5;{background_color}m{username.ljust(15)}\033[0m'
+
+        # Align the message to 15 spaces from the beginning
+        lines = []
+        current_line = ''
+        for word in message.split(' '):
+            if len(current_line) + len(word) < 80:
+                current_line += word + ' '
+            else:
+                lines.append(current_line.strip())
+                current_line = word + ' '
+        lines.append(current_line.strip())
+        formatted_message = '\n'.join([lines[0]] + [' ' * 13 + line for line in lines[1:]])
+
+        # Combine the formatted username and message
+        formatted_text = f'{formatted_username}: {formatted_message}'
+
+        return formatted_text
+
 
     while True:
         # Print system message
@@ -198,12 +226,16 @@ if __name__ == '__main__':
         print(center_string('Conversation Length: ' + chatlength, 54))
         print(center_string(' ', 54))
         print('<========================================================>')
+        print(current_user, 'Mood: ', observer.get_observation('Track_Mood', current_user))
+        print(current_bot, 'Mood: ', observer.get_observation('Track_Mood', current_bot))
+        lnfeed()
+
         chatlog = chat.fetch(current_chat, 'all_messages', 10)
         for message in chatlog:
-            print(message)
+            print(format_user_input(message))
 
         # get user input
-        current_dialog = input(current_user + ': ')
+        current_dialog = input('Reply: ')
 
         #
         #   Add Human Chat
@@ -221,20 +253,27 @@ if __name__ == '__main__':
             known_kb = []
 
         known_profiles = {}
-        known_profiles[ current_bot ] = [ 'personality', 'emotional_state', 'attention', 'beliefs', 'preferences' ]
-        known_profiles[ current_user ] = [ 'personality', 'emotional_state', 'attention', 'beliefs', 'preferences' ]
-        print('Generating Bots Repsonse To Chat...')
+        known_profiles[ current_bot ] = [ 'persona', 'Emotional_State', 'Preferences' ]
+        known_profiles[ current_user ] = [ 'Emotional_State', 'Preferences' ]
+        print('\n\nGenerating Bots Repsonse To Chat...')
         generated_text = bot.generate(current_bot, current_chat, known_kb, known_profiles)
-        print('Bot Said: ' + generated_text)
 
         #
         #   Add Bot Chat
         #
-        print('Adding Bots Repsonse To Chat...')
+        print('\n\nAdding Bots Repsonse To Chat...')
         chat.add(current_chat, 'user_' + current_bot, generated_text) # Add user message to personal log
         chat.add(current_chat, 'all_messages', current_bot + ': ' + generated_text) # Add user message to merged conversation log
         chat.add(current_chat, 'conversation', {'role': 'user', 'content': current_bot + ': ' + generated_text})
 
+        #
+        #   Run observers
+        #
+        print('\n\nAnalysing mood...')
+        observer.observe('Track_Mood', current_user, current_chat)
+        observer.observe('Track_Mood', current_bot, current_chat)
+        observer.observe('Get_Preferences', current_user, current_chat)
+        observer.observe('Get_Preferences', current_bot, current_chat)
         #
         #   Generate KB
         #
@@ -251,7 +290,7 @@ if __name__ == '__main__':
         arguments.extend(["-savekbs", savekbs]) # Also include current_user + current_bot << sort by name though or else youll have to make 2 copies
         arguments.extend(["-freezekb", 'N'])
 
-        print('Creating a memory of the chat...')
+        print('\n\nCreating a memory of the chat...')
         success = run_script_with_output("update_kb.py", arguments)
         print(success)
 
