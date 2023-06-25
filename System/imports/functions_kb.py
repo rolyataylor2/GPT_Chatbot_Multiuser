@@ -3,7 +3,6 @@
 #
 import functions_chatbot as chatbot
 import os
-import json
 import functions_helper as file
 knowledgeBasesDirectory = 'KnowledgeBase'
 
@@ -104,56 +103,52 @@ def update(kb_names, text):
             os.makedirs(directory)
 
         # Search the KB
-        file_list = search(kb, text, True)['files']
+        file_list = search(kb, text)['Sorted_Filenames']
 
         # No memory found, so save this one
         if len(file_list) == 0:
-            print('Creating memories in file: ', directory + memory['title'] + '.json')
-            file.save_json(directory + memory['title'] + '.json', memory)
-            update_directory(kb)
-            continue
-        
-        if hybrid_memory != '':
-            print('Copying memories in file: ', directory + memory['title'] + '.json')
             file.save_json(directory + memory['title'] + '.json', memory)
             update_directory(kb)
             continue
        
         # Merge new memory with old memory
-        print('Updating memories in file: ', directory + memory['title'] + '.json')
         article = file.open_json(directory + file_list[0])
-        hybrid_memory = merge(article, memory)
-        file.save_json(directory + file_list[0], hybrid_memory)
+        if article == {}:
+            file.save_json(directory + memory['title'] + '.json', memory)
+        else:
+            hybrid_memory = merge(article, memory)
+            file.save_json(directory + file_list[0], hybrid_memory)
         
 #
 # Search KB directory for articles
 #
-def search(kb_name, query, filenames_only=False):
+import yaml
+def parse_yaml(yaml_string):
+    try:
+        parsed_object = yaml.safe_load(yaml_string)
+        return parsed_object
+    except yaml.YAMLError as e:
+        print("Error parsing YAML:", e)
+        return None
+def search(kb_name, query):
     # Directory path
     directory = knowledgeBasesDirectory + '/' + kb_name + '/'
     if not os.path.exists(directory):
-        return {'files':[], 'concat':''}
+        return {'Sorted_Filenames':[], 'concat':''}
     
-    # Search the index for files
+    # Append files
     directory_index = file.open_file(directory + '/_dir.txt')
     system = chatbot.getScript('FS_KB_Search_Dir').replace('<<DIRECTORY>>', directory_index)
+    
+    # Push chat
     messages = []
     messages.append({'role': 'system', 'content': system})
     messages.append({'role': 'user', 'content': query})
     response = chatbot.execute(messages)
     
+    # Check output
     try:
-        filenames = json.loads(response)
-        filenames['concat'] = ''
+        response = parse_yaml(response)
+        return response
     except:
-        return {'files':[], 'concat':''}
-    
-    # Return the filenames
-    if filenames_only:
-        filenames['concat'] = ''
-        return filenames
-    
-    # Load all the articles
-    for filename in filenames:
-        filenames['concat'] += file.open_json(directory + filename)
-    return filenames
+        return {'Sorted_Filenames':[], 'concat':''}

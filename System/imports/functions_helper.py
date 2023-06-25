@@ -27,3 +27,11 @@ def open_json(filepath, default_object={}):
         return default_object
     return json.loads(data)
   
+import yaml
+def parse_yaml(yaml_string):
+    try:
+        parsed_object = yaml.safe_load(yaml_string)
+        return parsed_object
+    except yaml.YAMLError as e:
+        print("Error parsing YAML:", e)
+        return None
