@@ -22,9 +22,8 @@ RULES:
 - If the scene is not changing you will output "Scene not changed"
 
 Expected Output Format:
-- Scene_Components: < Based on the chatlog list a few possible scenes to change to >.
-- Scene_Location: < Choose a scene from the possible scenes >.
-- Scene_Description: < Description of the new scene >.
+- Location: < Use the chatlog to figure out where the location is >.
+- Location_Details: < Describe the location and all objects in the location >.
 """
 
 import functions_chatlog as chatlog
@@ -53,7 +52,6 @@ def observe(userUUID, chatUUID):
 
     try:
         set(chatUUID, new_state)
-        chatlog.add(chatUUID, 'all_messages', 'Narrator: A few moments later... (Scene has changed)')
     except:
         return ''
 

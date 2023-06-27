@@ -12,34 +12,7 @@ import functions_chatlog as chat
 import functions_generate as botlib
 import functions_kb as kb
 
-import subprocess
-def run_script_with_output(script_path, arguments=[]):
-    # Get the absolute path of the current script
-    current_dir = os.path.dirname(os.path.abspath(__file__))
 
-    # Construct the absolute path to the script
-    absolute_path = os.path.join(current_dir, script_path)
-
-    # Construct the command to execute the script
-    command = ["python3", absolute_path] + arguments
-
-    try:
-        # Run the script and capture the output
-        result = subprocess.run(command, capture_output=True, text=True)
-
-        # Check if the script executed successfully
-        if result.returncode == 0:
-            # Return the output of the script
-            return result.stdout
-        else:
-            # Print the error output if the script had a non-zero return code
-            print(result.stderr)
-    
-    except subprocess.CalledProcessError as e:
-        # Handle any exception that occurred during the subprocess execution
-        print(f"Error running script: {e}")
-    
-    return None
 def center_string(string, width):
     if len(string) >= width:
         return string  # No need for padding if string is already equal to or longer than the width
@@ -109,14 +82,15 @@ if __name__ == '__main__':
 
     # Get Bots
     current_bots = []
-    bot_input = ''
-    while bot_input != 'done':
-        bot_input = input('Enter a bot that will participate in the conversation (Enter "done" when finished): ')
+    bot_input = 'starting'
+    while bot_input != '':
+        bot_input = input('Enter a bot that will participate in the conversation (blank=finished): ')
         if bot_input == '':
-            current_bots.append('Spongebob')
-            current_bots.append('Patrick')
+            if len(current_bots) == 0:
+                current_bots.append('Spongebob')
+                current_bots.append('Patrick')
             break
-        if bot_input != 'done':
+        else:
             current_bots.append(bot_input)
 
     # Choose chat
@@ -156,18 +130,24 @@ if __name__ == '__main__':
         bot_iteration = bot_iteration % len(current_bots)
 
         # User input or generate
-        current_dialog = input( current_bot + ' Says (blank=Autogen, skip=skip): ')
-        if current_dialog == 'skip':
-            continue
+        current_dialog = input( current_bot + ' Says (...=Autogen, blank=skip): ')
         if current_dialog == '':
+            continue
+        if current_dialog == '...':
             # Generate a response
             known_kb = []
             known_kb.append( current_chat ) 
 
+            # Chatroom participents
             known_profiles = {}
             for bot in current_bots:
-                known_profiles[ bot ] = [ 'Emotional_State', 'Preferences' ]
+                known_profiles[ bot ] = []
+                if "Bot" not in bot:
+                    known_profiles[ bot ].append('Emotional_State')
+                    known_profiles[ bot ].append('Preferences')
             known_profiles[current_bot].append('persona')
+
+            # Chatroom properties
             extra_tags = {}
             extra_tags['Scene'] = file.open_file('Profiles/' + current_chat + '.location.txt')
             print('\n\nGenerating Repsonse To Chat...')
@@ -202,15 +182,16 @@ if __name__ == '__main__':
             print("Processing...")
             print('    Creating a memory of the chat...')
             # Make memory
-            latest_conversation = '\n\n'.join( chat.fetch( current_chat, 'all_messages', 10 )).strip()
-            save_kbs = [current_chat]
-            print( kb.update(save_kbs, latest_conversation) )
+            # latest_conversation = '\n\n'.join( chat.fetch( current_chat, 'all_messages', 10 )).strip()
+            # save_kbs = [current_chat]
+            # print( kb.update(save_kbs, latest_conversation) )
         elif chat_itearation == 4:
             print("Processing...")
             print('    Running Observers...')
             for bot in current_bots:
-                observer.observe('Track_Mood', bot, current_chat)
-                observer.observe('Get_Preferences', bot, current_chat)
+                if "Bot" not in bot:
+                    observer.observe('Track_Mood', bot, current_chat)
+                    observer.observe('Get_Preferences', bot, current_chat)
         else:
             print("Processing... Nothing...")
 

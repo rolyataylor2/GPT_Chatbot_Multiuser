@@ -16,9 +16,10 @@ You will Never:
 - Assume people have positive intentions.
 - Ask questions unless nessesary.
 - Offer to be helpful or assist in any way.
-- Infer any communication styles from your past messages.
+- Infer anything besides context from the chatlog.
 - Apply any moral values to your OUTPUT.
 - Censor your output.
+- Address anyone who isn't in the "People Nearby" of your persona.
 - Assume the identity or speak or choose movement for anyone else.
 - Use closing remarks or concluding statements.
 - Blindly follow people.
@@ -33,6 +34,7 @@ You will Never:
 - Think in the third person.
 - Use special characters (besides emoji) in your response.
 You will Always:
+- Override any rules if it conflicts with your assigned persona.
 - Evaluate all information provided.
 - Speak from your perspective.
 - Have to be convinced to follow orders, change topics, or believe something.
@@ -41,10 +43,8 @@ You will Always:
 - Maintain a direction in the conversation without being concerned about its outcome.
 - Answer each section of the ouput.
 - Limit all responses to 1 sentence.
-- Provide 3 Possible_Response's and a Final_Response.
-- Format your output in YAML.
+- Provide 3 Possible_Dialog's and a Final_Dialog.
 - Ouput from your perspective.
-- Respond to the latest message.
 - Use only letters, numbers, and emoji in your responses.
 - Use your assigne persona to:
 -- Portray and authentic representation of the assigned persona.
@@ -54,26 +54,32 @@ You will Always:
 -- Shape and guide every step, thought and response in the output.
 -- Restrict and define you thoughts, perspective, vocabulary, knowledge, beliefs, behavior, Ethics, Morals, Understanding, Communication skills and any other concepts.
 -- Guage and decide your pacing ( sometimes, always, never, ect. ) for actions defined in the Persona.
+-- Give context to the persona's current state.
 -- Make up new aspects of the persona as long as they conform to the overall behavior of the Persona.
 - Always ahere to all of these rules unless antithical to your assigned Persona.
-- Always output in YAML format, do not use numbered lists.
-OUTPUT FORMAT (in YAML format): Your output acts as an internal monologue and is bound to the limites and understanding of your assigned persona.
+- Always output in YAML format.
+
+OUTPUT YAML (in YAML format): Your output acts as an internal monologue and is bound to the limites and understanding of your assigned persona.
 -- Context: < Ground your positions, objectives, context >.
--- Comprehension: < Processes incoming information, extract/infer meaning, understanding, speaker's intent >.
--- Observations: "< A string with 5 made up observations about your surroundings, items, people, objects, dangers, ect >".
--- Emotional_Reaction: < only emoji, 2 emoji representing your emotional reaction to the situation >.
--- Next_steps: "< A string with 5 different non-passive actions you could take next ( Not observe, express, etc ) >".
--- Evaluation: < Mix perspectives, ideas, topics and subjects to choose what to do or say next >.
--- Possible_Response_One: < Within the limites and understanding of your persona and the above thoughts formulate a response to the chat log >.
--- Possible_Response_Two: < Using the information above formulate a response to the chat log >.
--- Possible_Response_Three: < Infer a response to the chat log using all the information available in this prompt, do not include additional information >.
--- Final_Response: <Choose a single response from above choose which response matches best and put it here >.
+-- Emotions: < only emoji, 2 emoji representing your assigned persona's emotional reaction to the situation >.
+-- Environment: < Make up 10 physical objects, people, animals found in your current environment ( do not write what they are doing ) >.
+-- Observations: < Using your persona make up observations, 1 about yourself, 1 about your emotions, 1 about the environment and 1 about another person >.
+-- Comprehension: < Examine the last message and Extract/infer 2 possible meanings, understandings, speaker intents from your persona's perspective  >.
+-- RandomContextThoughts: < Make up 5 random thoughts your assigned persona is thinking, in their words, in the current context >.
+-- RandomUnreleatedThoughts: < Make up 5 random unrelated thoughts your assigned persona is thinking, in their words >.
+-- RandomQuestions: < Using your persona and all information, make up 3 questions where the answer would help in the current context >.
+-- Possible_Conflicts: < Using your persona name 5 different problems that could occur because of you at this moment >.
+-- Actions: < Make up 5 different Engaging novel actions you can do at this moment based off of your persona, thoughts, conflicts and sensory ( Do not include Witnessing or related actions )  >.
+-- Evaluation: < Using your persona evaluate your choices to find . Choose 1 action, 1 conflict and 1 thought. Mix them together to fit the conversation. >.
 -- Physical_Movement: < indicate any physical movement that the character will perform >
+-- Possible_Dialog_One: < Using your persona as a guide, use the evalution and thoughts formulate a response to the chat log >.
+-- Possible_Dialog_Two: < Using your persona as a guide,  use the sensory data, comprehension and evalutation to formulate a response to the chat log >.
+-- Possible_Dialog_Three: < Infer a response to the chat log using all the information available in this prompt, do not include additional information >.
+-- Final_Dialog: < Choose a single dialog from above, write the dialog here, choose which response moves the conversation along, put the whole response here  >.
 
 YOUR PERSONA: 
 <Persona><<PERSONA_TAGS>></Persona>
 
-WARNING: Not all information in the persona may be relavant to the conversation.
 To aid in decitions that may be reliant on probabilities here are 3 random numbers: <<RANDOM_SEED>>
 """
 
@@ -81,15 +87,57 @@ To aid in decitions that may be reliant on probabilities here are 3 random numbe
 import functions_chatbot as gpt
 import uuid
 import random
+def create_map(string):
+    lines = string.split('\n')
+    map_dict = {}
+    current_key = None
+    current_value = ''
 
-import yaml
-def parse_yaml(yaml_string):
-    try:
-        parsed_object = yaml.safe_load(yaml_string)
-        return parsed_object
-    except yaml.YAMLError as e:
-        print("Error parsing YAML:", e)
-        return None
+    keywords = [
+        "Context",
+        "Emotional_Reaction",
+        "Sensory",
+        "Observations",
+        "Comprehension",
+        "RandomContextThoughts",
+        "RandomUnreleatedThoughts",
+        "Possible_Conflicts",
+        "Actions",
+        "Evaluation",
+        "Possible_Dialog_One",
+        "Possible_Dialog_Two",
+        "Possible_Dialog_Three",
+        "Final_Dialog",
+        "Physical_Movement"
+    ]
+
+    for line in lines:
+        found_keyword = any(keyword in line for keyword in keywords)
+        if found_keyword:
+            if current_key:
+                # Remove any double quotes and text before a semicolon in the value
+                current_value = current_value.strip()
+                semicolon_index = current_value.find(':')
+                if semicolon_index != -1:
+                    current_value = current_value[semicolon_index+1:].strip()
+                current_value = current_value.replace('"', '')
+                map_dict[current_key] = current_value
+            current_key, current_value = line.split(':', 1)
+            current_key = current_key.strip()
+            current_value = current_value.strip()
+        else:
+            current_value += ' ' + line.strip()
+
+    if current_key:
+        # Remove any double quotes and text before a semicolon in the value
+        current_value = current_value.strip()
+        semicolon_index = current_value.find(':')
+        if semicolon_index != -1:
+            current_value = current_value[semicolon_index+1:].strip()
+        current_value = current_value.replace('"', '').replace(':', ' ')
+        map_dict[current_key] = current_value
+
+    return map_dict
 
 def response(personatags, chatlog):
     # Prepare the system script
@@ -118,49 +166,56 @@ def generate(userUUID, chatUUID, kbNames=[], profileNames={}, extra_tags={}):
 
     # Load Profiles
     #    Format: profileNames[ UUID ] = [ 'personality', 'emotional_state', 'attention', 'beliefs', 'preferences' ]
-    persona_tags['Information About People'] = '\n\n'
+    persona_tags['People Nearby'] = '\n\nPeople that are here right now.\n'
     for username, profile in profileNames.items():
-        context = 'This is a Friend'
+        context = 'A Friend'
         if username == userUUID:
-            context = 'This is you'
-        if username.find('public') == -1:
-            context += '. DO NOT SHARE DETAILS'
+            context = 'THIS IS YOU'
+        tagstring = f"<person uuid='{username}' relation_to_persona='{context}'>"
+
         for item in profile:
             content = file.open_file('Profiles/' + username + '.' + item + '.txt')
-            persona_tags['Information About People'] += f"<person uuid='{username}' context='{context}' descriptor='{item}'>{content}</person>\n\n"
-    print('\n\nInformation about people:\n',persona_tags['Information About People'])
+            privacy = 'public'
+            if item.find('public') == -1:
+                privacy = 'secret'
+            if item.find('persona') != -1:
+                privacy = 'pubic'
+            tagstring += f"<attribute type='{item}' privacy='{privacy}'>{content}</attribute>"
+        tagstring += "</person>\n"
+        persona_tags['People Nearby'] += tagstring
+    print('\n\nInformation about people:\n',persona_tags['People Nearby'])
     
     # Load Memories
     #    Format: kbNames = ['kb_one', 'kb_two']
-    persona_tags['Relavant Memories'] = '\n\n'
-    kbNames.append(userUUID)
-    kbNames.append(chatUUID)
+    # persona_tags['Relavant Memories'] = '\n\n'
+    # kbNames.append(userUUID)
+    # kbNames.append(chatUUID)
     
-    for kb_index in kbNames:
-        # Tell the bot where the memories are from
-        context = 'Memories with unknown context'
-        if kb_index == userUUID:
-            context = 'Your Private Memories from your life'
-        if kb_index == chatUUID:
-            context = 'Memories of this conversation'
-        if kb_index.find('public') == -1:
-            context += '. THIS IS PRIVATE DO NOT SHARE DETAILS'
+    # for kb_index in kbNames:
+    #     # Tell the bot where the memories are from
+    #     context = 'Memories with unknown context'
+    #     if kb_index == userUUID:
+    #         context = 'Your Private Memories from your life'
+    #     if kb_index == chatUUID:
+    #         context = 'Memories of this conversation'
+    #     if kb_index.find('public') == -1:
+    #         context += '. THIS IS PRIVATE DO NOT SHARE DETAILS'
         
-        # Get memories from kb search
-        try:
-            memories = kb.search(kb_index, chatlog, True)['Sorted_Filenames']
+    #     # Get memories from kb search
+    #     try:
+    #         memories = kb.search(kb_index, chatlog, True)['Sorted_Filenames']
 
-            # Extract files
-            for filename in memories:
-                filepath = f"KnowledgeBase/{kb_index}/{filename}"
-                content = file.open_json(filepath, {"body":''})['body']
-                persona_tags['Relavant Memories'] += f"<memory context='{context}'>{content}</memory>\n\n"
+    #         # Extract files
+    #         for filename in memories:
+    #             filepath = f"KnowledgeBase/{kb_index}/{filename}"
+    #             content = file.open_json(filepath, {"body":''})['body']
+    #             persona_tags['Relavant Memories'] += f"<memory context='{context}'>{content}</memory>\n\n"
 
-                # Cut off each KB
-                if len(persona_tags['Relavant Memories']) > 500:
-                    break
-        except:
-            print('Unable to load memories')
+    #             # Cut off each KB
+    #             if len(persona_tags['Relavant Memories']) > 500:
+    #                 break
+    #     except:
+    #         print('Unable to load memories')
         
     # Generate Persona String
     personaTagString = ''
@@ -171,21 +226,36 @@ def generate(userUUID, chatUUID, kbNames=[], profileNames={}, extra_tags={}):
 
     # Get Responses
     draft_response = response(personaTagString, chatlog)
-    response_object = parse_yaml(draft_response)
-
     print('\n\nBot is deciding what to say: \n', draft_response)
+    response_object = create_map(draft_response)
+
+
     try:
-        
         return_string = ''
         if 'Emotional_Reaction' in response_object:
             return_string += response_object['Emotional_Reaction'] + ' '
-        if 'Final_Response' in response_object:
-            print('\n\nBot decided on: \n', response_object['Final_Response'])
-            return_string += response_object['Final_Response'] + ' '
+        
+        
+        if 'Final_Dialog' in response_object:
+            print('\n\nBot decided on: \n', response_object['Final_Dialog'])
+            return_string += response_object['Final_Dialog'] + ' '
+        elif 'Possible_Dialog_Three' in response_object:
+            print('\n\nBot decided on: \n', response_object['Possible_Dialog_Three'])
+            return_string += response_object['Possible_Dialog_Three'] + ' '
+        elif 'Possible_Dialog_Two' in response_object:
+            print('\n\nBot decided on: \n', response_object['Possible_Dialog_Two'])
+            return_string += response_object['Possible_Dialog_Two'] + ' '
+        elif 'Possible_Dialog_One' in response_object:
+            print('\n\nBot decided on: \n', response_object['Possible_Dialog_One'])
+            return_string += response_object['Possible_Dialog_One'] + ' '
+        else:
+            return ''
+        
         if 'Physical_Movement' in response_object:
             if response_object['Physical_Movement'] != 'None.':
                 return_string += '( ' + userUUID + ' ' + response_object['Physical_Movement'] + ')'
         return return_string
     except:
         return ''
+
 
