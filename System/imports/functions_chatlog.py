@@ -26,12 +26,16 @@ def fetch(chatlog_name, catagory, entries=3):
         return chatlog
     else:
         return chatlog[-entries:]
+    
+from datetime import datetime
+
 
 def add(chatlog_name, catagory, data):
     # Load
     chatlog = fetch(chatlog_name, catagory, -1)
     # Append
-    chatlog.append(data)
+    current_time = datetime.now().strftime("%I:%M%p")
+    chatlog.append( f"[{current_time}] {data}" )
     # Save
     save(chatlog_name, catagory, chatlog)
     return chatlog

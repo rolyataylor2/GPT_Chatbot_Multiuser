@@ -35,8 +35,8 @@ def inputBool(prompt):
 def lnfeed():
     print('\n')
 def format_user_input(text):
-    # Split the text into username and user message
-    username, message = text.split(': ')
+    # Split the text into time, username, and user message
+    time, username, message = text.split(' ', 2)
 
     # Calculate the sum of ASCII values of the username characters
     ascii_sum = sum(ord(char) for char in username) * 3
@@ -50,23 +50,11 @@ def format_user_input(text):
     # Calculate the font color as the opposite of the background color
     font_color = (background_color + 128) % 256
 
-    # Format the username with the calculated font and background colors, and left-justify
-    formatted_username = f'\033[38;5;{font_color};48;5;{background_color}m{username.ljust(15)}\033[0m'
+    # Format the username with the calculated font and background colors
+    formatted_username = f'\033[38;5;{font_color};48;5;{background_color}m{username}\033[0m'
 
-    # Align the message to 15 spaces from the beginning
-    lines = []
-    current_line = ''
-    for word in message.split(' '):
-        if len(current_line) + len(word) < 80:
-            current_line += word + ' '
-        else:
-            lines.append(current_line.strip())
-            current_line = word + ' '
-    lines.append(current_line.strip())
-    formatted_message = '\n'.join([lines[0]] + [' ' * 13 + line for line in lines[1:]])
-
-    # Combine the formatted username and message
-    formatted_text = f'{formatted_username}: {formatted_message}'
+    # Combine the formatted username and the rest of the message
+    formatted_text = f'[{time}] {formatted_username}: {message}'
 
     return formatted_text
 
@@ -133,6 +121,16 @@ if __name__ == '__main__':
         current_dialog = input( current_bot + ' Says (...=Autogen, blank=skip): ')
         if current_dialog == '':
             continue
+        if current_dialog == '/kick':
+            if len(current_bots) > 1:
+                current_bots.remove(current_bot)
+                bot_iteration = 0
+            continue
+        if current_dialog[:4] == '/add':
+            arguments = current_dialog.split(' ')
+            current_bots.append(arguments[1])
+            bot_iteration = len(current_bots)-2
+            continue
         if current_dialog == '...':
             # Generate a response
             known_kb = []
@@ -157,9 +155,8 @@ if __name__ == '__main__':
         #   Add Chat
         #
         print('Adding Repsonse To Chat...')
-        chat.add(current_chat, 'user_' + current_bot, current_dialog) # Add user message to personal log
+        chat.add(current_chat, 'user_' + current_bot, current_bot + ': ' + current_dialog) # Add user message to personal log
         chat.add(current_chat, 'all_messages', current_bot + ': ' + current_dialog) # Add user message to merged conversation log
-        chat.add(current_chat, 'conversation', {'role': 'user', 'content': current_bot + ': ' + current_dialog})
 
         #
         #   Run observers
