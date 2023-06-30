@@ -26,7 +26,7 @@ To use the script, follow the steps below:
 
 ## Quick Overview
 
-- `converse.py`: This script is a user interface for the following scripts, run this to engage in a full chat interface with bots
+- `chat_converse.py`: This script is a user interface for the following scripts, run this to engage in a full chat interface with bots
 
 ## Features
 
